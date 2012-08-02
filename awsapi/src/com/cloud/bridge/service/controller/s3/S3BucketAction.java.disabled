@@ -284,7 +284,7 @@ private void executeMultiObjectDelete(HttpServletRequest request, HttpServletRes
 							  engineRequest.setVersion(versionID);
 						  }
 
-						S3Response engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );
+						S3Response engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );
 						int resultCode = engineResponse.getResultCode();
 						String resutlDesc = engineResponse.getResultDescription();
 						if(resultCode == 204) {
@@ -397,7 +397,7 @@ private void executeMultiObjectDelete(HttpServletRequest request, HttpServletRes
 	        policyDao.deletePolicy( bucketName );
 	        if (null != policy && !policy.isEmpty()) policyDao.addPolicy( bucketName, client, policy );
 	                
-    		if (null != sbp) ServiceProvider.getInstance().setBucketPolicy( bucketName, sbp );
+    		if (null != sbp) JCloudsServiceProvider.getInstance().setBucketPolicy( bucketName, sbp );
     		response.setStatus(200);  		
     	}
     	catch( PermissionDeniedException e ) {
@@ -497,7 +497,7 @@ private void executeMultiObjectDelete(HttpServletRequest request, HttpServletRes
 	    		 response.setStatus(204);
 	        }
 	        else {
-	   	         ServiceProvider.getInstance().deleteBucketPolicy( bucketName );
+	   	         JCloudsServiceProvider.getInstance().deleteBucketPolicy( bucketName );
     	         policyDao.deletePolicy( bucketName );
     		     response.setStatus(200);
 	        }
@@ -521,7 +521,7 @@ private void executeMultiObjectDelete(HttpServletRequest request, HttpServletRes
 		
 
 
-		S3ListAllMyBucketsResponse engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
+		S3ListAllMyBucketsResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
 		
 		// To allow the all buckets list to be serialized via Axiom classes
 		ListAllMyBucketsResponse allBuckets = S3SerializableServiceImplementation.toListAllMyBucketsResponse( engineResponse );
@@ -568,7 +568,7 @@ private void executeMultiObjectDelete(HttpServletRequest request, HttpServletRes
 		int maxKeys = Converter.toInt(request.getParameter("max-keys"), 1000);
 		engineRequest.setMaxKeys(maxKeys);
 		try {
-		S3ListBucketResponse engineResponse = ServiceProvider.getInstance().getS3Engine().listBucketContents( engineRequest, false );
+		S3ListBucketResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().listBucketContents( engineRequest, false );
 		
 		// To allow the all list buckets result to be serialized via Axiom classes
 		ListBucketResponse oneBucket = S3SerializableServiceImplementation.toListBucketResponse( engineResponse );
@@ -612,7 +612,7 @@ private void executeMultiObjectDelete(HttpServletRequest request, HttpServletRes
 		engineRequest.setSignature( "" );   // TODO - Consider providing signature in a future release which allows additional user description
 		engineRequest.setBucketName((String)request.getAttribute(S3Constants.BUCKET_ATTR_KEY));
 
-		S3AccessControlPolicy engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
+		S3AccessControlPolicy engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
 		
 		// To allow the bucket acl policy result to be serialized via Axiom classes
 		GetBucketAccessControlPolicyResponse onePolicy = S3SerializableServiceImplementation.toGetBucketAccessControlPolicyResponse( engineResponse );
@@ -695,7 +695,7 @@ private void executeMultiObjectDelete(HttpServletRequest request, HttpServletRes
 		
 		int maxKeys = Converter.toInt(request.getParameter("max-keys"), 1000);
 		engineRequest.setMaxKeys(maxKeys);
-		S3ListBucketResponse engineResponse = ServiceProvider.getInstance().getS3Engine().listBucketContents( engineRequest, true );
+		S3ListBucketResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().listBucketContents( engineRequest, true );
 		
 		// -> the SOAP version produces different XML
 		StringBuffer xml = new StringBuffer();
@@ -821,7 +821,7 @@ private void executeMultiObjectDelete(HttpServletRequest request, HttpServletRes
 		engineRequest.setBucketName((String)request.getAttribute(S3Constants.BUCKET_ATTR_KEY));
 		engineRequest.setConfig((S3CreateBucketConfiguration)objectInContent);
 		try {
-		S3CreateBucketResponse engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
+		S3CreateBucketResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
 		response.addHeader("Location", "/" + engineResponse.getBucketName());
 		response.setContentLength(0);
 		response.setStatus(200);
@@ -867,7 +867,7 @@ private void executeMultiObjectDelete(HttpServletRequest request, HttpServletRes
 		
 		
 		// [C] Allow an S3Engine to handle the S3SetBucketAccessControlPolicyRequest
-	    S3Response engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);	
+	    S3Response engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
 	    response.setStatus( engineResponse.getResultCode());
 
 	}
@@ -961,7 +961,7 @@ private void executeMultiObjectDelete(HttpServletRequest request, HttpServletRes
 	{
 		S3DeleteBucketRequest engineRequest = new S3DeleteBucketRequest();
 		engineRequest.setBucketName((String)request.getAttribute(S3Constants.BUCKET_ATTR_KEY));
-		S3Response engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);  
+		S3Response engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
 		response.setStatus(engineResponse.getResultCode());
 		response.flushBuffer();
 	}

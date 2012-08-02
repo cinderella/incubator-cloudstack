@@ -32,12 +32,8 @@ import java.util.UUID;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Logger;
-import org.hibernate.ejb.criteria.expression.UnaryArithmeticOperation.Operation;
 import org.xml.sax.SAXException;
 
-import com.cloud.bridge.persist.dao.CloudStackSvcOfferingDao;
-import com.cloud.bridge.persist.dao.CloudStackAccountDao;
-import com.cloud.bridge.persist.dao.OfferingDao;
 import com.cloud.bridge.service.UserContext;
 
 import com.cloud.bridge.service.core.ec2.EC2ImageAttributes.ImageAttribute;
@@ -85,7 +81,7 @@ public class EC2Engine {
 	private CloudStackAccount currentAccount = null;
 
 	public EC2Engine() throws IOException {
-		loadConfigValues();
+//		loadConfigValues();
 	}
 
 	/**
@@ -95,6 +91,7 @@ public class EC2Engine {
 	 * 
 	 * @throws IOException
 	 */
+/*
 	private void loadConfigValues() throws IOException {
 		File propertiesFile = ConfigurationHelper.findConfigurationFile("ec2-service.properties");
 		if (null != propertiesFile) {
@@ -145,7 +142,8 @@ public class EC2Engine {
 			}
 		} else logger.error( "ec2-service.properties not found" );
 	}
-	
+*/
+
 	/**
 	 * Helper function to manage the api connection
 	 * 
@@ -1469,7 +1467,7 @@ public class EC2Engine {
 			if(request.getInstanceType() != null){ 
 			    instanceType = request.getInstanceType();
 			}
-			CloudStackServiceOffering svcOffering = getCSServiceOfferingId(instanceType);
+			CloudStackServiceOffering svcOffering = null; //getCSServiceOfferingId(instanceType);
 			if(svcOffering == null){
 			    logger.info("No ServiceOffering found to be defined by name, please contact the administrator "+instanceType );
 			    throw new EC2ServiceException(ClientError.Unsupported, "instanceType: [" + instanceType + "] not found!");
@@ -1778,6 +1776,7 @@ public class EC2Engine {
      * 
 	 */
 	
+/*
 	private CloudStackServiceOffering getCSServiceOfferingId(String instanceType){
        try {
            if (null == instanceType) instanceType = "m1.small";                      
@@ -1790,7 +1789,8 @@ public class EC2Engine {
             throw new EC2ServiceException(ServerError.InternalError, e.getMessage());
         }
 	}
-	
+*/
+
 	/**
 	 * Convert from the Cloud serviceOfferingId to the Amazon instanceType strings based
 	 * on the loaded map.
@@ -1799,7 +1799,8 @@ public class EC2Engine {
 	 * @return A valid value for the Amazon defined instanceType
 	 * @throws SQLException, ClassNotFoundException, IllegalAccessException, InstantiationException 
 	 */
-	private String serviceOfferingIdToInstanceType( String serviceOfferingId ){	
+/*
+	private String serviceOfferingIdToInstanceType( String serviceOfferingId ){
         try{
             CloudStackSvcOfferingDao dao = new CloudStackSvcOfferingDao();
             CloudStackServiceOffering offering =  dao.getSvcOfferingById(serviceOfferingId);
@@ -1814,6 +1815,7 @@ public class EC2Engine {
             throw new EC2ServiceException(ServerError.InternalError, e.getMessage());
         }
 	}
+*/
 
 	/**
 	 * Match the value in the 'description' field of the listOsTypes response to get 
@@ -1904,7 +1906,7 @@ public class EC2Engine {
     			ec2Vm.setHypervisor(cloudVm.getHypervisor());
     			ec2Vm.setRootDeviceType(cloudVm.getRootDeviceType());
     			ec2Vm.setRootDeviceId(cloudVm.getRootDeviceId());
-    			ec2Vm.setServiceOffering(serviceOfferingIdToInstanceType(cloudVm.getServiceOfferingId().toString()));
+//    			ec2Vm.setServiceOffering(serviceOfferingIdToInstanceType(cloudVm.getServiceOfferingId().toString()));
     
     			List<CloudStackNic> nics = cloudVm.getNics();
     			for(CloudStackNic nic : nics) {
@@ -2239,7 +2241,7 @@ public class EC2Engine {
             CloudStackAccount caller = getCurrentAccount();
             List<CloudStackZone> cloudZones;
 
-            String defaultZoneId = getDefaultZoneId(caller.getId());
+            String defaultZoneId = null; //getDefaultZoneId(caller.getId());
             if (defaultZoneId != null) {
                 cloudZones = getApi().listZones(true, null, defaultZoneId, null);
             } else {
@@ -2256,6 +2258,7 @@ public class EC2Engine {
         /**
          * Finds the defaultZone marked for the account
          */
+/*
         private String getDefaultZoneId(String accountId) {
             try {
                 CloudStackAccountDao dao = new CloudStackAccountDao();
@@ -2266,6 +2269,7 @@ public class EC2Engine {
                 throw new EC2ServiceException(ServerError.InternalError, e.getMessage());
             }
         }
+*/
 
 	/**
 	 * Windows has its own device strings.

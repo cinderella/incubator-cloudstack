@@ -198,7 +198,9 @@ public class EC2RestAuth {
 			
 		// -> the passed in signature is defined to be URL encoded? (and it must be base64 encoded)
 		int offset = signature.indexOf( "%" );
-		if (-1 != offset) signature = URLDecoder.decode( signature, "UTF-8" );
+		if (-1 != offset) {
+         signature = URLDecoder.decode( signature, "UTF-8" );
+      }
 	
         boolean match = signature.equals( calSig );
         if (!match) logger.error( "Signature mismatch, [" + signature + "] [" + calSig + "] over [" + StringToSign + "]" );
