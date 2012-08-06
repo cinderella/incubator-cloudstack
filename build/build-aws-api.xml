@@ -132,41 +132,11 @@
 			</fileset>
 		</jar>
 	</target>
-	<target name="build-awsapi-s3" depends="-init-awsapi, compile-awsapi" description="Builds awsapi S3 AAR file.">
-		<jar jarfile="${dist.files.dir}/cloud-s3.aar" basedir="${target.dir}/classes/cloud-awsapi.jar" excludes="**/*">
-			<!--                            
-                    <metainf dir="${base.dir}/resource/AmazonS3">
-                        <include name="services.xml" />
-                        <include name="AmazonS3.wsdl" />
-                    </metainf>
--->
-		</jar>
-	</target>
-	<target name="build-cloud-auth-s3" depends="-init-awsapi, compile-awsapi" description="Builds awsapi S3 auth MAR file.">
-		<jar jarfile="${dist.files.dir}/cloud-auth-s3.mar" basedir="${target.dir}/classes/cloud-awsapi.jar" excludes="**/*">
-			<fileset dir="${target.dir}/classes/cloud-awsapi.jar">
-				<include name="**/auth/s3/*.class" />
-			</fileset>
-			<metainf dir="${base.dir}/awsapi/src/com/cloud/bridge/auth/s3">
-				<include name="module.xml" />
-			</metainf>
-		</jar>
-	</target>
 	<target name="build-awsapi-ec2" depends="-init-awsapi, compile-awsapi" description="Builds awsapi EC2 AAR file.">
 		<jar jarfile="${dist.files.dir}/cloud-ec2.aar" basedir="${target.dir}/classes/cloud-awsapi.jar" excludes="**/*">
 			<metainf dir="${base.dir}/awsapi/resource/AmazonEC2">
 				<include name="services.xml" />
 				<include name="AmazonEC2.wsdl" />
-			</metainf>
-		</jar>
-	</target>
-	<target name="build-cloud-auth-ec2" depends="-init-awsapi, compile-awsapi" description="Builds awsapi EC2 auth MAR file.">
-		<jar jarfile="${dist.files.dir}/cloud-auth-ec2.mar" basedir="${target.dir}/classes/cloud-awsapi.jar" excludes="**/*">
-			<fileset dir="${target.dir}/classes/cloud-awsapi.jar">
-				<include name="**/auth/ec2/*.class" />
-			</fileset>
-			<metainf dir="${base.dir}/awsapi/src/com/cloud/bridge/auth/ec2">
-				<include name="module.xml" />
 			</metainf>
 		</jar>
 	</target>
@@ -193,29 +163,12 @@
 			<arg value="--url=${env.EC2_URL}" />
 		</exec>
 	</target>
-	<target name="build-awsapi" depends="build-awsapi-jar,build-awsapi-s3,build-awsapi-ec2,build-cloud-auth-s3,build-cloud-auth-ec2" description="Builds all of awsapi">
+	<target name="build-awsapi" depends="build-awsapi-jar,build-awsapi-ec2" description="Builds all of awsapi">
 	</target>
 	<target name="deploy-awsapi" depends="deploy-axis">
-		<!--
-                <copy todir="${deploy.dir}/webapps/awsapi/WEB-INF/services">
-                        <fileset dir="${dist.files.dir}">
-                                <include name="cloud-s3.aar"/>
-                        </fileset>
-                </copy>
-		-->	
 		<copy todir="${server.deploy.to.dir}/webapps/awsapi/WEB-INF/services">
 			<fileset dir="${dist.files.dir}">
 				<include name="cloud-ec2.aar" />
-			</fileset>
-		</copy>
-		<copy todir="${server.deploy.to.dir}/webapps/awsapi/WEB-INF/modules">
-			<fileset dir="${dist.files.dir}">
-				<include name="cloud-auth-s3.mar" />
-			</fileset>
-		</copy>
-		<copy todir="${server.deploy.to.dir}/webapps/awsapi/WEB-INF/modules">
-			<fileset dir="${dist.files.dir}">
-				<include name="cloud-auth-ec2.mar" />
 			</fileset>
 		</copy>
 		<copy todir="${server.deploy.to.dir}/webapps/awsapi/WEB-INF/lib">
@@ -272,23 +225,6 @@
 		</copy>
 	</target>
 	<target name="deploy-debian-install" depends="build-awsapi-jar, build-awsapi">
-		<copy todir="${debian.tomcat.dir}/webapps/awsapi/WEB-INF/services">
-			<fileset dir="${dist.files.dir}">
-				<!--                
-                <include name="cloud-s3.aar"/>
--->
-				<include name="cloud-ec2.aar" />
-			</fileset>
-		</copy>
-		<copy todir="${debian.tomcat.dir}/webapps/awsapi/WEB-INF/modules">
-			<fileset dir="${dist.files.dir}">
-				<include name="cloud-auth-s3.mar" />
-				<include name="cloud-auth-ec2.mar" />
-			</fileset>
-			<fileset dir="${base.dir}/modules">
-				<include name="*.mar" />
-			</fileset>
-		</copy>
 		<copy todir="${debian.tomcat.dir}/webapps/awsapi/WEB-INF/lib">
 			<fileset dir="${base.dir}/rampart-lib">
 				<include name="*.jar" />
@@ -347,19 +283,7 @@
 	<target name="deploy-rpm-install" depends="build-awsapi-jar, build-awsapi">
 		<copy todir="${rpm.tomcat.dir}/webapps/awsapi/WEB-INF/services">
 			<fileset dir="${dist.files.dir}">
-<!--                
-                <include name="cloud-s3.aar"/>
--->
 				<include name="cloud-ec2.aar" />
-			</fileset>
-		</copy>
-		<copy todir="${rpm.tomcat.dir}/webapps/awsapi/WEB-INF/modules">
-			<fileset dir="${dist.files.dir}">
-				<include name="cloud-auth-s3.mar" />
-				<include name="cloud-auth-ec2.mar" />
-			</fileset>
-            <fileset dir="${base.dir}/awsapi/modules">
-				<include name="*.mar" />
 			</fileset>
 		</copy>
 		<copy todir="${rpm.tomcat.dir}/webapps/awsapi/WEB-INF/lib">
@@ -426,28 +350,12 @@
 		<echo message="downloading ElasticLoadBalancing.wsdl..." />
 		<get src="http://elasticloadbalancing.amazonaws.com/doc/2011-04-05/ElasticLoadBalancing.wsdl" dest="wsdl/" verbose="true" usetimestamp="true" overwrite="false"/>
 	</target>	
-	<target name="codegen-server-s3">
-		<wsdl2code 
-    	wsdlfilename="${base.dir}/wsdl/cloud-AmazonS3.wsdl" 
-    	serverside="true" 
-    	generateservicexml="true" 
-    	skipbuildxml="true" 
-    	serversideinterface="true" 
-    	namespacetopackages="http://s3.amazonaws.com/doc/2006-03-01/=com.amazon.s3"
-    	targetsourcefolderlocation="src" 
-    	targetresourcesfolderlocation="resource/AmazonS3" 
-    	overwrite="true" 
-    />
-	</target>
 	<target name="codegen-server-ec2">
 		<wsdl2code wsdlfilename="${base.dir}/wsdl/AmazonEC2.wsdl" serverside="true" generateservicexml="true" skipbuildxml="true" serversideinterface="true" namespacetopackages="http://ec2.amazonaws.com/doc/2010-11-15/=com.amazon.ec2"
     targetsourcefolderlocation="src" targetresourcesfolderlocation="resource/AmazonEC2" overwrite="true" />
 	</target>
 	<target name="codegen-server-elb" depends="download-ELB-wsdl">
 		<wsdl2code wsdlfilename="${base.dir}/wsdl/ElasticLoadBalancing.wsdl" serverside="true" generateservicexml="true" skipbuildxml="true" serversideinterface="true" namespacetopackages="http://elasticloadbalancing.amazonaws.com/doc/2011-04-05/=com.amazon.elb" targetsourcefolderlocation="src" targetresourcesfolderlocation="resource/AmazonELB" overwrite="true" />
-	</target>
-	<target name="codegen-client-s3">
-		<wsdl2code wsdlfilename="${base.dir}/wsdl/cloud-AmazonS3.wsdl" serverside="false" generateservicexml="false" skipbuildxml="true" serversideinterface="false" namespacetopackages="http://s3.amazonaws.com/doc/2006-03-01/=com.amazon.s3.client" targetsourcefolderlocation="src" targetresourcesfolderlocation="resource/AmazonS3" overwrite="true" />
 	</target>
 	<target name="codegen-client-ec2">
 		<wsdl2code wsdlfilename="${base.dir}/wsdl/AmazonEC2.wsdl" serverside="false" generateservicexml="false" skipbuildxml="true" serversideinterface="false" namespacetopackages="http://ec2.amazonaws.com/doc/2010-11-15/=com.amazon.ec2.clieent" targetsourcefolderlocation="src" targetresourcesfolderlocation="resource/AmazonEC2" overwrite="true" />

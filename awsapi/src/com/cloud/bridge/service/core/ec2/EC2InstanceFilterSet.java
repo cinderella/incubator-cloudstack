@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.cloud.bridge.service.EC2SoapServiceImpl;
+import com.cloud.bridge.service.GeneratedCode;
 import com.cloud.bridge.service.exception.EC2ServiceException;
 
 
@@ -134,11 +134,11 @@ public class EC2InstanceFilterSet {
 	    }
 	    else if (filterName.equalsIgnoreCase( "instance-state-code" )) 
 	    {
-	    	 return containsInteger( EC2SoapServiceImpl.toAmazonCode( vm.getState()), valueSet );		
+	    	 return containsInteger( GeneratedCode.toAmazonCode( vm.getState()), valueSet );		
 	    }
 	    else if (filterName.equalsIgnoreCase( "instance-state-name" )) 
 	    {
-	    	 return containsString( EC2SoapServiceImpl.toAmazonStateName( vm.getState()), valueSet );		
+	    	 return containsString( GeneratedCode.toAmazonStateName( vm.getState()), valueSet );		
 	    }
 	    else if (filterName.equalsIgnoreCase( "ip-address" )) 
 	    {

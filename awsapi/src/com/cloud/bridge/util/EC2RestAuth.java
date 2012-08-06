@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 
 
 public class EC2RestAuth {
-    protected final static Logger logger = Logger.getLogger(RestAuth.class);
+    protected final static Logger logger = Logger.getLogger(EC2RestAuth.class);
 
 	// TreeMap: used to Sort the UTF-8 query string components by parameter name with natural byte ordering
 	protected TreeMap<String, String> queryParts               = null;   // used to generate a CanonicalizedQueryString

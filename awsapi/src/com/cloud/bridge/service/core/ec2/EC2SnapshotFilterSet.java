@@ -27,7 +27,6 @@ import java.util.TimeZone;
 
 import com.cloud.bridge.service.UserContext;
 import com.cloud.bridge.service.exception.EC2ServiceException;
-import com.cloud.bridge.util.DateHelper;
 import com.cloud.bridge.util.EC2RestAuth;
 
 public class EC2SnapshotFilterSet {
