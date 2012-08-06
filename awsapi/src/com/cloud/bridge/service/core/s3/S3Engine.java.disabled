@@ -289,7 +289,7 @@ public class S3Engine {
 			 	
 			 // Delete all the policy state associated with the bucket
 			 try {
-	   	         ServiceProvider.getInstance().deleteBucketPolicy( bucketName );
+	   	         JCloudsServiceProvider.getInstance().deleteBucketPolicy( bucketName );
 		         BucketPolicyDao policyDao = new BucketPolicyDao();
 		         policyDao.deletePolicy( bucketName );
 			 }
@@ -504,7 +504,7 @@ public class S3Engine {
 	        S3MultipartPart[] parts = uploadDao.getParts( uploadId, 10000, 0 );
 	        for( int i=0; i < parts.length; i++ )
 	        {    
-    	        bucketAdapter.deleteObject( host_storagelocation_pair.getSecond(), ServiceProvider.getInstance().getMultipartDir(), parts[i].getPath());
+    	        bucketAdapter.deleteObject( host_storagelocation_pair.getSecond(), JCloudsServiceProvider.getInstance().getMultipartDir(), parts[i].getPath());
 	        }
 	        
 	        uploadDao.deleteUpload( uploadId );
@@ -594,7 +594,7 @@ public class S3Engine {
 
 		try {
 			is = request.getDataInputStream();
-			String md5Checksum = bucketAdapter.saveObject(is, host_storagelocation_pair.getSecond(), ServiceProvider.getInstance().getMultipartDir(), itemFileName);
+			String md5Checksum = bucketAdapter.saveObject(is, host_storagelocation_pair.getSecond(), JCloudsServiceProvider.getInstance().getMultipartDir(), itemFileName);
 			response.setETag(md5Checksum);	
 			
     	    MultipartLoadDao uploadDao = new MultipartLoadDao();
@@ -1396,7 +1396,7 @@ public class S3Engine {
 		if (PersistContext.acquireNamedLock("bucket.creation", LOCK_ACQUIRING_TIMEOUT_SECONDS)) 
 		{
 			try {
-			    allocBucketStorageHost(bucketName, ServiceProvider.getInstance().getMultipartDir());
+			    allocBucketStorageHost(bucketName, JCloudsServiceProvider.getInstance().getMultipartDir());
             }
 		    finally {
 		    	PersistContext.releaseNamedLock("bucket.creation");
@@ -1432,7 +1432,7 @@ public class S3Engine {
 		}
 		
 		// To make things simple, only allow one local mounted storage root TODO - Change in the future
-		String localStorageRoot = ServiceProvider.getInstance().getStartupProperties().getProperty("storage.root");
+		String localStorageRoot = JCloudsServiceProvider.getInstance().getStartupProperties().getProperty("storage.root");
 		if(localStorageRoot != null) {
 			SHost localSHost = shostDao.getLocalStorageHost(mhost.getId(), localStorageRoot);
 			if(localSHost == null)
@@ -1742,7 +1742,7 @@ public class S3Engine {
 	public static S3BucketPolicy loadPolicy( S3PolicyContext context ) 
 	    throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, ParseException
 	{
-		OrderedPair<S3BucketPolicy,Integer> result = ServiceProvider.getInstance().getBucketPolicy( context.getBucketName());
+		OrderedPair<S3BucketPolicy,Integer> result = JCloudsServiceProvider.getInstance().getBucketPolicy( context.getBucketName());
 		S3BucketPolicy policy = result.getFirst();
 		if ( null == policy )
 		{
@@ -1753,14 +1753,14 @@ public class S3Engine {
 			    String policyInJson = policyDao.getPolicy( context.getBucketName());
 			    // -> place in cache that no policy exists in the database
 			    if (null == policyInJson) {
-	    	        ServiceProvider.getInstance().setBucketPolicy(context.getBucketName(), null);
+	    	        JCloudsServiceProvider.getInstance().setBucketPolicy(context.getBucketName(), null);
 			    	return null;
 			    }
 			    
 	       		PolicyParser parser = new PolicyParser();
 	    		policy = parser.parse( policyInJson, context.getBucketName());
 	    		if (null != policy) 
-	    	        ServiceProvider.getInstance().setBucketPolicy(context.getBucketName(), policy);
+	    	        JCloudsServiceProvider.getInstance().setBucketPolicy(context.getBucketName(), policy);
 			 }
 		}
 		return policy;

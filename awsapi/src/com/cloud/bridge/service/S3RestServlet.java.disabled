@@ -342,7 +342,7 @@ public class S3RestServlet extends HttpServlet {
 				 auth.addAmazonHeader( headerName + ":" + headers[i].getValue());
 		}
 		
-		UserInfo info = ServiceProvider.getInstance().getUserInfo(AWSAccessKey);
+		UserInfo info = JCloudsServiceProvider.getInstance().getUserInfo(AWSAccessKey);
 		if (info == null) throw new PermissionDeniedException("Unable to authenticate access key: " + AWSAccessKey);
 		
     	try {
@@ -370,7 +370,7 @@ public class S3RestServlet extends HttpServlet {
     	String bucketName = null;
     	String key = null;
     	
-    	String serviceEndpoint = ServiceProvider.getInstance().getServiceEndpoint();
+    	String serviceEndpoint = JCloudsServiceProvider.getInstance().getServiceEndpoint();
     	String host            = request.getHeader("Host");
     	
     	// Check for unrecognized forms of URI information in request
@@ -400,7 +400,7 @@ public class S3RestServlet extends HttpServlet {
     		
     	    {   		
     		// -> verify the format of the bucket name
-    		int endPos = host.indexOf( ServiceProvider.getInstance().getMasterDomain());
+    		int endPos = host.indexOf( JCloudsServiceProvider.getInstance().getMasterDomain());
     		if ( endPos > 0 ) 
     		{
     			 bucketName = host.substring(0, endPos);
@@ -567,7 +567,7 @@ private S3ObjectAction routePlainPostRequest (HttpServletRequest request)
             // -> need to do SOAP level auth here, on failure return the SOAP fault
             StringBuffer xml = new StringBuffer();
             String AWSAccessKey = putRequest.getAccessKey();
-    		UserInfo info = ServiceProvider.getInstance().getUserInfo(AWSAccessKey);
+    		UserInfo info = JCloudsServiceProvider.getInstance().getUserInfo(AWSAccessKey);
     		try 
     		{   S3SoapAuth.verifySignature( putRequest.getSignature(), "PutObject", putRequest.getRawTimestamp(), AWSAccessKey, info.getSecretKey());   	
     		

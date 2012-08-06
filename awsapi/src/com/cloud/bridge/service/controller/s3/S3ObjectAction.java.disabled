@@ -208,7 +208,7 @@ public class S3ObjectAction implements ServletAction {
 		
 		
 		// [C] Do the actual work and return the result
-		S3CopyObjectResponse engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );		
+		S3CopyObjectResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );
 		
         versionId = engineResponse.getCopyVersion();
         if (null != versionId) response.addHeader( "x-amz-copy-source-version-id", versionId );
@@ -244,7 +244,7 @@ public class S3ObjectAction implements ServletAction {
 		String queryString = request.getQueryString();
 		if (null != queryString) engineRequest.setVersion( returnParameter( queryString, "versionId=" ));
 
-		S3AccessControlPolicy engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
+		S3AccessControlPolicy engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
 	    int resultCode = engineResponse.getResultCode();
 	    if (200 != resultCode) {
 	        response.setStatus( resultCode );
@@ -310,7 +310,7 @@ public class S3ObjectAction implements ServletAction {
         
      	
  		 // [C] Allow an S3Engine to handle the S3SetObjectAccessControlPolicyRequest
- 	     S3Response engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);	
+ 	     S3Response engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
  	     response.setStatus( engineResponse.getResultCode());
      
 	}
@@ -333,7 +333,7 @@ public class S3ObjectAction implements ServletAction {
 		String queryString = request.getQueryString();
 		if (null != queryString) engineRequest.setVersion( returnParameter( queryString, "versionId=" ));
 
-		S3GetObjectResponse engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );			
+		S3GetObjectResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );
 		response.setStatus( engineResponse.getResultCode());
 		
 		if (engineResponse.getResultCode()  >=400 ) {
@@ -390,7 +390,7 @@ public class S3ObjectAction implements ServletAction {
 		DataHandler dataHandler = new DataHandler(new ServletRequestDataSource(request));
 		engineRequest.setData(dataHandler);
 
-		S3PutObjectInlineResponse engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
+		S3PutObjectInlineResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
 		response.setHeader("ETag", "\"" + engineResponse.getETag() + "\"");
 		String version = engineResponse.getVersion();
 		if (null != version) response.addHeader( "x-amz-version-id", version );		
@@ -413,7 +413,7 @@ public class S3ObjectAction implements ServletAction {
 		String queryString = request.getQueryString();
 		if (null != queryString) engineRequest.setVersion( returnParameter( queryString, "versionId=" ));
 		
-		S3Response engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );
+		S3Response engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );
 		
 		response.setStatus( engineResponse.getResultCode());	
 		String version = engineRequest.getVersion();
@@ -461,7 +461,7 @@ public class S3ObjectAction implements ServletAction {
 		DataHandler dataHandler = new DataHandler(new ServletRequestDataSource(request));
 		engineRequest.setData(dataHandler);
 
-		S3PutObjectInlineResponse engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
+		S3PutObjectInlineResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest(engineRequest);
 		response.setHeader("ETag", "\"" + engineResponse.getETag() + "\"");
 		String version = engineResponse.getVersion();
 		if (null != version) response.addHeader( "x-amz-version-id", version );		
@@ -485,7 +485,7 @@ public class S3ObjectAction implements ServletAction {
 		String queryString = request.getQueryString();
 		if (null != queryString) engineRequest.setVersion( returnParameter( queryString, "versionId=" ));
 
-		S3GetObjectResponse engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );		
+		S3GetObjectResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );
 		response.setStatus( engineResponse.getResultCode());
 		
 		String deleteMarker = engineResponse.getDeleteMarker();
@@ -645,7 +645,7 @@ public class S3ObjectAction implements ServletAction {
 		
 		// [C] Perform the request
         if (0 < countMeta) engineRequest.setMetaEntries( metaSet.toArray(new S3MetaDataEntry[0]));
-		S3PutObjectInlineResponse engineResponse = ServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );
+		S3PutObjectInlineResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().handleRequest( engineRequest );
 		response.setHeader("ETag", "\"" + engineResponse.getETag() + "\"");
 		String version = engineResponse.getVersion();
 		if (null != version) response.addHeader( "x-amz-version-id", version );		
@@ -678,7 +678,7 @@ public class S3ObjectAction implements ServletAction {
 		engineRequest.setKey(key);
 		engineRequest.setCannedAccess( cannedAccess );
 		engineRequest.setMetaEntries( meta );
-		S3PutObjectInlineResponse engineResponse = ServiceProvider.getInstance().getS3Engine().initiateMultipartUpload( engineRequest ); 
+		S3PutObjectInlineResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().initiateMultipartUpload( engineRequest );
 		int result = engineResponse.getResultCode();
 		response.setStatus( result );
         if (200 != result) return;
@@ -749,7 +749,7 @@ public class S3ObjectAction implements ServletAction {
 		DataHandler dataHandler = new DataHandler(new ServletRequestDataSource(request));
 		engineRequest.setData(dataHandler);
 
-		S3PutObjectInlineResponse engineResponse = ServiceProvider.getInstance().getS3Engine().saveUploadPart( engineRequest, uploadId, partNumber ); 
+		S3PutObjectInlineResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().saveUploadPart( engineRequest, uploadId, partNumber );
 		if (null != engineResponse.getETag()) response.setHeader("ETag", "\"" + engineResponse.getETag() + "\"");
 		response.setStatus(engineResponse.getResultCode());
 	}
@@ -832,10 +832,10 @@ public class S3ObjectAction implements ServletAction {
 		engineRequest.setMetaEntries(meta);
 		engineRequest.setCannedAccess(cannedAccess);
 
-		S3PutObjectInlineResponse engineResponse = ServiceProvider.getInstance().getS3Engine().concatentateMultipartUploads( response, engineRequest, parts, outputStream );
+		S3PutObjectInlineResponse engineResponse = JCloudsServiceProvider.getInstance().getS3Engine().concatentateMultipartUploads( response, engineRequest, parts, outputStream );
 		int result = engineResponse.getResultCode();
 		// -> free all multipart state since we now have one concatentated object
-		if (200 == result) ServiceProvider.getInstance().getS3Engine().freeUploadParts( bucket, uploadId, false ); 
+		if (200 == result) JCloudsServiceProvider.getInstance().getS3Engine().freeUploadParts( bucket, uploadId, false );
 		
 		// If all successful then clean up all left over parts
 		// Notice that "<?xml version=\"1.0\" encoding=\"utf-8\"?>" has already been written into the servlet output stream at the beginning of section [A]
@@ -863,7 +863,7 @@ public class S3ObjectAction implements ServletAction {
 		String temp = request.getParameter("uploadId");
     	if (null != temp) uploadId = Integer.parseInt( temp );
     	
-    	int result = ServiceProvider.getInstance().getS3Engine().freeUploadParts( bucket, uploadId, true ); 
+    	int result = JCloudsServiceProvider.getInstance().getS3Engine().freeUploadParts( bucket, uploadId, true );
         response.setStatus( result );
 	}
 	

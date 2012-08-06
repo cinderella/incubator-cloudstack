@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
+import com.cloud.bridge.service.core.VCloudEngine;
 import org.apache.commons.codec.binary.Base64;
 
 import com.amazon.ec2.*;
@@ -96,10 +97,10 @@ import com.cloud.bridge.util.EC2RestAuth;
 
 public class EC2SoapServiceImpl implements AmazonEC2SkeletonInterface  {
 
-    private static EC2Engine engine;
+    private static VCloudEngine engine;
     
     @SuppressWarnings("static-access")
-	public EC2SoapServiceImpl(EC2Engine engine) {
+	public EC2SoapServiceImpl(VCloudEngine engine) {
     	this.engine = engine;
     }
 
@@ -1324,7 +1325,7 @@ public class EC2SoapServiceImpl implements AmazonEC2SkeletonInterface  {
 	}
 
 	
-	public static DescribeInstancesResponse toDescribeInstancesResponse(EC2DescribeInstancesResponse engineResponse, EC2Engine engine) 
+	public static DescribeInstancesResponse toDescribeInstancesResponse(EC2DescribeInstancesResponse engineResponse, VCloudEngine engine)
 	{
 	    DescribeInstancesResponse response = new DescribeInstancesResponse();
 	    DescribeInstancesResponseType param1 = new DescribeInstancesResponseType();
@@ -1654,7 +1655,7 @@ public class EC2SoapServiceImpl implements AmazonEC2SkeletonInterface  {
 		return response;
 	}
 
-	public static RunInstancesResponse toRunInstancesResponse(EC2RunInstancesResponse engineResponse, EC2Engine engine ) {
+	public static RunInstancesResponse toRunInstancesResponse(EC2RunInstancesResponse engineResponse, VCloudEngine engine ) {
 	    RunInstancesResponse response = new RunInstancesResponse();
 	    RunInstancesResponseType param1 = new RunInstancesResponseType();
 	    
@@ -1930,7 +1931,7 @@ public class EC2SoapServiceImpl implements AmazonEC2SkeletonInterface  {
 		return response;
 	}
 	
-	public static CreateSnapshotResponse toCreateSnapshotResponse(EC2Snapshot engineResponse, EC2Engine engine ) {
+	public static CreateSnapshotResponse toCreateSnapshotResponse(EC2Snapshot engineResponse, VCloudEngine engine ) {
 		CreateSnapshotResponse response = new CreateSnapshotResponse();
 		CreateSnapshotResponseType param1 = new CreateSnapshotResponseType();
 		

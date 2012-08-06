@@ -40,7 +40,6 @@ import java.util.Properties;
 import java.util.UUID;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +48,9 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.cloud.bridge.service.controller.JCloudsServiceProvider;
+import com.cloud.bridge.service.core.VCloudEngine;
+import com.cloud.bridge.util.ConfigurationHelper;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.AxisFault;
@@ -95,11 +97,6 @@ import com.amazon.ec2.RunInstancesResponse;
 import com.amazon.ec2.StartInstancesResponse;
 import com.amazon.ec2.StopInstancesResponse;
 import com.amazon.ec2.TerminateInstancesResponse;
-import com.cloud.bridge.model.UserCredentials;
-import com.cloud.bridge.persist.PersistContext;
-import com.cloud.bridge.persist.dao.OfferingDao;
-import com.cloud.bridge.persist.dao.UserCredentialsDao;
-import com.cloud.bridge.service.controller.s3.ServiceProvider;
 import com.cloud.bridge.service.core.ec2.EC2AssociateAddress;
 import com.cloud.bridge.service.core.ec2.EC2AuthorizeRevokeSecurityGroup;
 import com.cloud.bridge.service.core.ec2.EC2CreateImage;
@@ -115,7 +112,6 @@ import com.cloud.bridge.service.core.ec2.EC2DescribeSecurityGroups;
 import com.cloud.bridge.service.core.ec2.EC2DescribeSnapshots;
 import com.cloud.bridge.service.core.ec2.EC2DescribeVolumes;
 import com.cloud.bridge.service.core.ec2.EC2DisassociateAddress;
-import com.cloud.bridge.service.core.ec2.EC2Engine;
 import com.cloud.bridge.service.core.ec2.EC2Filter;
 import com.cloud.bridge.service.core.ec2.EC2GroupFilterSet;
 import com.cloud.bridge.service.core.ec2.EC2Image;
@@ -138,9 +134,7 @@ import com.cloud.bridge.service.exception.NoSuchObjectException;
 import com.cloud.bridge.service.exception.PermissionDeniedException;
 import com.cloud.bridge.service.exception.EC2ServiceException.ClientError;
 import com.cloud.bridge.util.AuthenticationUtils;
-import com.cloud.bridge.util.ConfigurationHelper;
 import com.cloud.bridge.util.EC2RestAuth;
-import com.cloud.stack.models.CloudStackAccount;
 
 
 public class EC2RestServlet extends HttpServlet {
@@ -156,7 +150,7 @@ public class EC2RestServlet extends HttpServlet {
    private String keystorePassword = null;
    private String wsdlVersion      = null;
    private String version          = null;
-   private String testsecret       = null;
+   private Properties ec2properties = null;
 
    boolean debug=true;
 
@@ -167,25 +161,24 @@ public class EC2RestServlet extends HttpServlet {
     */
    @Override
    public void init( ServletConfig config ) throws ServletException {
-      File propertiesFile = new File(config.getServletContext().getRealPath("/") + File.separator + "WEB-INF" + File.separator + "conf" + File.separator + "ec2-service.properties");
-
-      Properties EC2Prop = null;
+//      ConfigurationHelper.preSetConfigPath(config.getServletContext().getRealPath("/") + File.separator + "WEB-INF" + File.separator + "conf");
+      ConfigurationHelper.preSetConfigPath(System.getProperty("user.home", "/etc") + "/.cinderella");
+      File propertiesFile = ConfigurationHelper.findConfigurationFile("ec2-service.properties");
+      ec2properties = new Properties();
 
       if (null != propertiesFile) {
          logger.info("Use EC2 properties file: " + propertiesFile.getAbsolutePath());
-         EC2Prop = new Properties();
          try {
-            EC2Prop.load( new FileInputStream( propertiesFile ));
+            ec2properties.load(new FileInputStream(propertiesFile));
          } catch (FileNotFoundException e) {
             logger.warn("Unable to open properties file: " + propertiesFile.getAbsolutePath(), e);
          } catch (IOException e) {
             logger.warn("Unable to read properties file: " + propertiesFile.getAbsolutePath(), e);
          }
-         String keystore  = EC2Prop.getProperty( "keystore" );
-         keystorePassword = EC2Prop.getProperty( "keystorePass" );
-         wsdlVersion      = EC2Prop.getProperty( "WSDLVersion", "2010-11-15" );
-         version = EC2Prop.getProperty( "cloudbridgeVersion", "UNKNOWN VERSION" );
-         testsecret = EC2Prop.getProperty("test.awssecretkey");
+         String keystore  = ec2properties.getProperty( "keystore" );
+         keystorePassword = ec2properties.getProperty( "keystorePass" );
+         wsdlVersion      = ec2properties.getProperty( "WSDLVersion", "2010-11-15" );
+         version = ec2properties.getProperty( "cloudbridgeVersion", "UNKNOWN VERSION" );
 
          String installedPath = System.getenv("CATALINA_HOME");
          if (installedPath == null) installedPath = System.getenv("CATALINA_BASE");
@@ -222,10 +215,12 @@ public class EC2RestServlet extends HttpServlet {
       logRequest(request);
 
       // -> unauthenticated calls, should still be done over HTTPS
+/*
       if (action.equalsIgnoreCase( "SetUserKeys" )) {
          setUserKeys(request, response);
          return;
       }
+*/
 
       if (action.equalsIgnoreCase( "CloudEC2Version" )) {
          cloudEC2Version(request, response);
@@ -269,10 +264,12 @@ public class EC2RestServlet extends HttpServlet {
          else if (action.equalsIgnoreCase( "StartInstances"            )) startInstances(request, response);
          else if (action.equalsIgnoreCase( "StopInstances"             )) stopInstances(request, response);
          else if (action.equalsIgnoreCase( "TerminateInstances"        )) terminateInstances(request, response);
+/*
          else if (action.equalsIgnoreCase( "SetCertificate"            )) setCertificate(request, response);
          else if (action.equalsIgnoreCase( "DeleteCertificate"         )) deleteCertificate(request, response);
          else if (action.equalsIgnoreCase( "SetOfferMapping"           )) setOfferMapping(request, response);
          else if (action.equalsIgnoreCase( "DeleteOfferMapping"        )) deleteOfferMapping(request, response);
+*/
          else if (action.equalsIgnoreCase( "CreateKeyPair"             )) createKeyPair(request, response);
          else if (action.equalsIgnoreCase( "ImportKeyPair"             )) importKeyPair(request, response);
          else if (action.equalsIgnoreCase( "DeleteKeyPair"             )) deleteKeyPair(request, response);
@@ -282,8 +279,8 @@ public class EC2RestServlet extends HttpServlet {
             logger.error("Unsupported action " + action);
             throw new EC2ServiceException(ClientError.Unsupported, "This operation is not available");
          }
-         PersistContext.commitTransaction();
-         PersistContext.commitTransaction(true);
+//         PersistContext.commitTransaction();
+//         PersistContext.commitTransaction(true);
 
       } catch( EC2ServiceException e ) {
          response.setStatus(e.getErrorCode());
@@ -296,8 +293,8 @@ public class EC2RestServlet extends HttpServlet {
          }
       } catch( PermissionDeniedException e ) {
          logger.error("Unexpected exception: " + e.getMessage(), e);
-         response.setStatus(403);
-         endResponse(response, "Access denied");
+         response.setStatus(401);
+         faultResponse(response, "AuthFailure", e.getMessage());
 
       } catch( Exception e ) {
          logger.error("Unexpected exception: " + e.getMessage(), e);
@@ -344,6 +341,7 @@ public class EC2RestServlet extends HttpServlet {
     *
     * As with all REST calls HTTPS should be used to ensure their security.
     */
+/*
    private void setUserKeys( HttpServletRequest request, HttpServletResponse response ) {
       String[] accessKey = null;
       String[] secretKey = null;
@@ -374,7 +372,7 @@ public class EC2RestServlet extends HttpServlet {
 
       try {
          // -> use the keys to see if the account actually exists
-         ServiceProvider.getInstance().getEC2Engine().validateAccount( accessKey[0], secretKey[0] );
+         JCloudsServiceProvider.getInstance().getVCloudEngine().validateAccount( accessKey[0], secretKey[0] );
          UserCredentialsDao credentialDao = new UserCredentialsDao();
          credentialDao.setUserKeys( accessKey[0], secretKey[0] );
 
@@ -387,6 +385,7 @@ public class EC2RestServlet extends HttpServlet {
       response.setStatus(200);
       endResponse(response, "User keys set successfully");
    }
+*/
 
    /**
     * The SOAP API for EC2 uses WS-Security to sign all client requests.  This requires that
@@ -441,8 +440,8 @@ public class EC2RestServlet extends HttpServlet {
          // [C] Associate the cert's uniqueId with the Cloud API keys
          String uniqueId = AuthenticationUtils.X509CertUniqueId( userCert );
          logger.debug( "SetCertificate, uniqueId: " + uniqueId );
-         UserCredentialsDao credentialDao = new UserCredentialsDao();
-         credentialDao.setCertificateId( accessKey[0], uniqueId );
+//         UserCredentialsDao credentialDao = new UserCredentialsDao();
+//         credentialDao.setCertificateId( accessKey[0], uniqueId );
          response.setStatus(200);
          endResponse(response, "User certificate set successfully");
 
@@ -487,8 +486,8 @@ public class EC2RestServlet extends HttpServlet {
             certStore.store( fsOut, keystorePassword.toCharArray());
 
             // -> dis-associate the cert's uniqueId with the Cloud API keys
-            UserCredentialsDao credentialDao = new UserCredentialsDao();
-            credentialDao.setCertificateId( accessKey[0], null );
+//            UserCredentialsDao credentialDao = new UserCredentialsDao();
+//            credentialDao.setCertificateId( accessKey[0], null );
             response.setStatus(200);
             endResponse(response, "User certificate deleted successfully");
          }
@@ -509,6 +508,7 @@ public class EC2RestServlet extends HttpServlet {
     * (e.g., m1.small, cc1.4xlarge) and the cloudstack service offering ids.  Setting
     * an existing mapping just over writes the prevous values.
     */
+/*
    private void setOfferMapping( HttpServletRequest request, HttpServletResponse response ) {
       String amazonOffer = null;
       String cloudOffer = null;
@@ -535,7 +535,7 @@ public class EC2RestServlet extends HttpServlet {
 
       // validate account is admin level
       try {
-         CloudStackAccount currentAccount = ServiceProvider.getInstance().getEC2Engine().getCurrentAccount();
+         CloudStackAccount currentAccount = JCloudsServiceProvider.getInstance().getVCloudEngine().getCurrentAccount();
 
          if (currentAccount.getAccountType() != 1) {
             logger.debug("SetOfferMapping called by non-admin user!");
@@ -563,7 +563,9 @@ public class EC2RestServlet extends HttpServlet {
       response.setStatus(200);
       endResponse(response, "offering mapping set successfully");
    }
+*/
 
+/*
    private void deleteOfferMapping( HttpServletRequest request, HttpServletResponse response ) {
       String amazonOffer = null;
 
@@ -584,7 +586,7 @@ public class EC2RestServlet extends HttpServlet {
 
       // validate account is admin level
       try {
-         CloudStackAccount currentAccount = ServiceProvider.getInstance().getEC2Engine().getCurrentAccount();
+         CloudStackAccount currentAccount = JCloudsServiceProvider.getInstance().getVCloudEngine().getCurrentAccount();
 
          if (currentAccount.getAccountType() != 1) {
             logger.debug("deleteOfferMapping called by non-admin user!");
@@ -612,6 +614,7 @@ public class EC2RestServlet extends HttpServlet {
       response.setStatus(200);
       endResponse(response, "offering mapping deleted successfully");
    }
+*/
 
    /**
     * The approach taken here is to map these REST calls into the same objects used
@@ -644,7 +647,7 @@ public class EC2RestServlet extends HttpServlet {
       else { response.sendError(530, "Missing Device parameter" ); return; }
 
       // -> execute the request
-      AttachVolumeResponse EC2response = EC2SoapServiceImpl.toAttachVolumeResponse( ServiceProvider.getInstance().getEC2Engine().attachVolume( EC2request ));
+      AttachVolumeResponse EC2response = EC2SoapServiceImpl.toAttachVolumeResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().attachVolume( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -703,7 +706,7 @@ public class EC2RestServlet extends HttpServlet {
 
       // -> execute the request
       RevokeSecurityGroupIngressResponse EC2response = EC2SoapServiceImpl.toRevokeSecurityGroupIngressResponse(
-      ServiceProvider.getInstance().getEC2Engine().revokeSecurityGroup( EC2request ));
+      JCloudsServiceProvider.getInstance().getVCloudEngine().revokeSecurityGroup( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -772,7 +775,7 @@ public class EC2RestServlet extends HttpServlet {
 
       // -> execute the request
       AuthorizeSecurityGroupIngressResponse EC2response = EC2SoapServiceImpl.toAuthorizeSecurityGroupIngressResponse(
-      ServiceProvider.getInstance().getEC2Engine().authorizeSecurityGroup( EC2request ));
+      JCloudsServiceProvider.getInstance().getVCloudEngine().authorizeSecurityGroup( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -794,7 +797,7 @@ public class EC2RestServlet extends HttpServlet {
          EC2request.setDevice( device[0] );
 
       // -> execute the request
-      DetachVolumeResponse EC2response = EC2SoapServiceImpl.toDetachVolumeResponse( ServiceProvider.getInstance().getEC2Engine().detachVolume( EC2request ));
+      DetachVolumeResponse EC2response = EC2SoapServiceImpl.toDetachVolumeResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().detachVolume( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -808,7 +811,7 @@ public class EC2RestServlet extends HttpServlet {
       else { response.sendError(530, "Missing VolumeId parameter" ); return; }
 
       // -> execute the request
-      DeleteVolumeResponse EC2response = EC2SoapServiceImpl.toDeleteVolumeResponse( ServiceProvider.getInstance().getEC2Engine().deleteVolume( EC2request ));
+      DeleteVolumeResponse EC2response = EC2SoapServiceImpl.toDeleteVolumeResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().deleteVolume( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -844,7 +847,7 @@ public class EC2RestServlet extends HttpServlet {
 
 
       // -> execute the request
-      CreateVolumeResponse EC2response = EC2SoapServiceImpl.toCreateVolumeResponse( ServiceProvider.getInstance().getEC2Engine().createVolume( EC2request ));
+      CreateVolumeResponse EC2response = EC2SoapServiceImpl.toCreateVolumeResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().createVolume( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -864,7 +867,7 @@ public class EC2RestServlet extends HttpServlet {
       else { response.sendError(530, "Missing GroupDescription parameter" ); return; }
 
       // -> execute the request
-      CreateSecurityGroupResponse EC2response = EC2SoapServiceImpl.toCreateSecurityGroupResponse( ServiceProvider.getInstance().getEC2Engine().createSecurityGroup( groupName, groupDescription ));
+      CreateSecurityGroupResponse EC2response = EC2SoapServiceImpl.toCreateSecurityGroupResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().createSecurityGroup( groupName, groupDescription ));
       serializeResponse(response, EC2response);
    }
 
@@ -878,7 +881,7 @@ public class EC2RestServlet extends HttpServlet {
       else { response.sendError(530, "Missing GroupName parameter" ); return; }
 
       // -> execute the request
-      DeleteSecurityGroupResponse EC2response = EC2SoapServiceImpl.toDeleteSecurityGroupResponse( ServiceProvider.getInstance().getEC2Engine().deleteSecurityGroup( groupName ));
+      DeleteSecurityGroupResponse EC2response = EC2SoapServiceImpl.toDeleteSecurityGroupResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().deleteSecurityGroup( groupName ));
       serializeResponse(response, EC2response);
    }
 
@@ -892,7 +895,7 @@ public class EC2RestServlet extends HttpServlet {
       else { response.sendError(530, "Missing SnapshotId parameter" ); return; }
 
       // -> execute the request
-      DeleteSnapshotResponse EC2response = EC2SoapServiceImpl.toDeleteSnapshotResponse( ServiceProvider.getInstance().getEC2Engine().deleteSnapshot( snapshotId ));
+      DeleteSnapshotResponse EC2response = EC2SoapServiceImpl.toDeleteSnapshotResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().deleteSnapshot( snapshotId ));
       serializeResponse(response, EC2response);
    }
 
@@ -906,7 +909,7 @@ public class EC2RestServlet extends HttpServlet {
       else { response.sendError(530, "Missing VolumeId parameter" ); return; }
 
       // -> execute the request
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
       CreateSnapshotResponse EC2response = EC2SoapServiceImpl.toCreateSnapshotResponse( engine.createSnapshot( volumeId ), engine);
       serializeResponse(response, EC2response);
    }
@@ -921,7 +924,7 @@ public class EC2RestServlet extends HttpServlet {
       else { response.sendError(530, "Missing ImageId parameter" ); return; }
 
       // -> execute the request
-      DeregisterImageResponse EC2response = EC2SoapServiceImpl.toDeregisterImageResponse( ServiceProvider.getInstance().getEC2Engine().deregisterImage( image ));
+      DeregisterImageResponse EC2response = EC2SoapServiceImpl.toDeregisterImageResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().deregisterImage( image ));
       serializeResponse(response, EC2response);
    }
 
@@ -944,7 +947,7 @@ public class EC2RestServlet extends HttpServlet {
          EC2request.setDescription( description[0] );
 
       // -> execute the request
-      CreateImageResponse EC2response = EC2SoapServiceImpl.toCreateImageResponse( ServiceProvider.getInstance().getEC2Engine().createImage( EC2request ));
+      CreateImageResponse EC2response = EC2SoapServiceImpl.toCreateImageResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().createImage( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -971,7 +974,7 @@ public class EC2RestServlet extends HttpServlet {
          EC2request.setDescription( description[0] );
 
       // -> execute the request
-      RegisterImageResponse EC2response = EC2SoapServiceImpl.toRegisterImageResponse( ServiceProvider.getInstance().getEC2Engine().registerImage( EC2request ));
+      RegisterImageResponse EC2response = EC2SoapServiceImpl.toRegisterImageResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().registerImage( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -991,7 +994,7 @@ public class EC2RestServlet extends HttpServlet {
       else { response.sendError(530, "Missing Description parameter" ); return; }
 
       // -> execute the request
-      ModifyImageAttributeResponse EC2response = EC2SoapServiceImpl.toModifyImageAttributeResponse( ServiceProvider.getInstance().getEC2Engine().modifyImageAttribute( image ));
+      ModifyImageAttributeResponse EC2response = EC2SoapServiceImpl.toModifyImageAttributeResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().modifyImageAttribute( image ));
       serializeResponse(response, EC2response);
    }
 
@@ -1006,7 +1009,7 @@ public class EC2RestServlet extends HttpServlet {
 
       // -> execute the request
       image.setDescription( "" );
-      ResetImageAttributeResponse EC2response = EC2SoapServiceImpl.toResetImageAttributeResponse( ServiceProvider.getInstance().getEC2Engine().modifyImageAttribute( image ));
+      ResetImageAttributeResponse EC2response = EC2SoapServiceImpl.toResetImageAttributeResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().modifyImageAttribute( image ));
       serializeResponse(response, EC2response);
    }
 
@@ -1049,7 +1052,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       // -> execute the request
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
       RunInstancesResponse EC2response = EC2SoapServiceImpl.toRunInstancesResponse( engine.runInstances( EC2request ), engine);
       serializeResponse(response, EC2response);
    }
@@ -1074,7 +1077,7 @@ public class EC2RestServlet extends HttpServlet {
       if (0 == count) { response.sendError(530, "Missing InstanceId parameter" ); return; }
 
       // -> execute the request
-      RebootInstancesResponse EC2response = EC2SoapServiceImpl.toRebootInstancesResponse( ServiceProvider.getInstance().getEC2Engine().rebootInstances(EC2request));
+      RebootInstancesResponse EC2response = EC2SoapServiceImpl.toRebootInstancesResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().rebootInstances(EC2request));
       serializeResponse(response, EC2response);
    }
 
@@ -1098,7 +1101,7 @@ public class EC2RestServlet extends HttpServlet {
       if (0 == count) { response.sendError(530, "Missing InstanceId parameter" ); return; }
 
       // -> execute the request
-      StartInstancesResponse EC2response = EC2SoapServiceImpl.toStartInstancesResponse( ServiceProvider.getInstance().getEC2Engine().startInstances(EC2request));
+      StartInstancesResponse EC2response = EC2SoapServiceImpl.toStartInstancesResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().startInstances(EC2request));
       serializeResponse(response, EC2response);
    }
 
@@ -1122,7 +1125,7 @@ public class EC2RestServlet extends HttpServlet {
       if (0 == count) { response.sendError(530, "Missing InstanceId parameter" ); return; }
 
       // -> execute the request
-      StopInstancesResponse EC2response = EC2SoapServiceImpl.toStopInstancesResponse( ServiceProvider.getInstance().getEC2Engine().stopInstances( EC2request ));
+      StopInstancesResponse EC2response = EC2SoapServiceImpl.toStopInstancesResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().stopInstances( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -1147,7 +1150,7 @@ public class EC2RestServlet extends HttpServlet {
 
       // -> execute the request
       EC2request.setDestroyInstances( true );
-      TerminateInstancesResponse EC2response = EC2SoapServiceImpl.toTermInstancesResponse( ServiceProvider.getInstance().getEC2Engine().stopInstances( EC2request ));
+      TerminateInstancesResponse EC2response = EC2SoapServiceImpl.toTermInstancesResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().stopInstances( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -1169,7 +1172,7 @@ public class EC2RestServlet extends HttpServlet {
          }
       }
       // -> execute the request
-      DescribeAvailabilityZonesResponse EC2response = EC2SoapServiceImpl.toDescribeAvailabilityZonesResponse( ServiceProvider.getInstance().getEC2Engine().handleRequest( EC2request ));
+      DescribeAvailabilityZonesResponse EC2response = EC2SoapServiceImpl.toDescribeAvailabilityZonesResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().handleRequest( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -1187,7 +1190,7 @@ public class EC2RestServlet extends HttpServlet {
          }
       }
       // -> execute the request
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
       DescribeImagesResponse EC2response = EC2SoapServiceImpl.toDescribeImagesResponse( engine.describeImages( EC2request ));
       serializeResponse(response, EC2response);
    }
@@ -1208,7 +1211,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       // -> execute the request
-      DescribeImageAttributeResponse EC2response = EC2SoapServiceImpl.toDescribeImageAttributeResponse( ServiceProvider.getInstance().getEC2Engine().describeImages( EC2request ));
+      DescribeImageAttributeResponse EC2response = EC2SoapServiceImpl.toDescribeImageAttributeResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().describeImages( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -1239,7 +1242,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       // -> execute the request
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
       DescribeInstancesResponse EC2response = EC2SoapServiceImpl.toDescribeInstancesResponse( engine.describeInstances( EC2request ), engine);
       serializeResponse(response, EC2response);
    }
@@ -1258,14 +1261,14 @@ public class EC2RestServlet extends HttpServlet {
          }
       }
       // -> execute the request
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
       serializeResponse(response, EC2SoapServiceImpl.toDescribeAddressesResponse( engine.describeAddresses( ec2Request)));
    }
 
    private void allocateAddress( HttpServletRequest request, HttpServletResponse response )
    throws ADBException, XMLStreamException, IOException {
 
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
 
       AllocateAddressResponse ec2Response = EC2SoapServiceImpl.toAllocateAddressResponse( engine.allocateAddress());
 
@@ -1275,7 +1278,7 @@ public class EC2RestServlet extends HttpServlet {
    private void releaseAddress( HttpServletRequest request, HttpServletResponse response )
    throws ADBException, XMLStreamException, IOException {
 
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
 
       String publicIp = request.getParameter( "PublicIp" );
       if (publicIp == null) {
@@ -1295,7 +1298,7 @@ public class EC2RestServlet extends HttpServlet {
 
    private void associateAddress( HttpServletRequest request, HttpServletResponse response )
    throws ADBException, XMLStreamException, IOException {
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
 
       String publicIp = request.getParameter( "PublicIp" );
       if (null == publicIp) {
@@ -1321,7 +1324,7 @@ public class EC2RestServlet extends HttpServlet {
 
    private void disassociateAddress( HttpServletRequest request, HttpServletResponse response )
    throws ADBException, XMLStreamException, IOException {
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
 
       String publicIp = request.getParameter( "PublicIp" );
       if (null == publicIp) {
@@ -1364,7 +1367,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       // -> execute the request
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
 
       DescribeSecurityGroupsResponse EC2response = EC2SoapServiceImpl.toDescribeSecurityGroupsResponse( engine.describeSecurityGroups( EC2request ));
       serializeResponse(response, EC2response);
@@ -1398,7 +1401,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       // -> execute the request
-      DescribeInstanceAttributeResponse EC2response = EC2SoapServiceImpl.toDescribeInstanceAttributeResponse( ServiceProvider.getInstance().getEC2Engine().describeInstances(EC2request));
+      DescribeInstanceAttributeResponse EC2response = EC2SoapServiceImpl.toDescribeInstanceAttributeResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().describeInstances(EC2request));
       serializeResponse(response, EC2response);
    }
 
@@ -1429,7 +1432,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       // -> execute the request
-      EC2Engine engine = ServiceProvider.getInstance().getEC2Engine();
+      VCloudEngine engine = JCloudsServiceProvider.getInstance().getVCloudEngine();
       DescribeSnapshotsResponse EC2response = EC2SoapServiceImpl.toDescribeSnapshotsResponse( engine.handleRequest( EC2request ));
       serializeResponse(response, EC2response);
    }
@@ -1462,7 +1465,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       // -> execute the request
-      DescribeVolumesResponse EC2response = EC2SoapServiceImpl.toDescribeVolumesResponse( ServiceProvider.getInstance().getEC2Engine().handleRequest( EC2request ));
+      DescribeVolumesResponse EC2response = EC2SoapServiceImpl.toDescribeVolumesResponse( JCloudsServiceProvider.getInstance().getVCloudEngine().handleRequest( EC2request ));
       serializeResponse(response, EC2response);
    }
 
@@ -1545,7 +1548,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       DescribeKeyPairsResponse EC2Response = EC2SoapServiceImpl.toDescribeKeyPairs(
-      ServiceProvider.getInstance().getEC2Engine().describeKeyPairs( ec2Request ));
+      JCloudsServiceProvider.getInstance().getVCloudEngine().describeKeyPairs( ec2Request ));
       serializeResponse(response, EC2Response);
    }
 
@@ -1571,7 +1574,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       ImportKeyPairResponse EC2Response = EC2SoapServiceImpl.toImportKeyPair(
-      ServiceProvider.getInstance().getEC2Engine().importKeyPair( ec2Request ));
+      JCloudsServiceProvider.getInstance().getVCloudEngine().importKeyPair( ec2Request ));
       serializeResponse(response, EC2Response);
    }
 
@@ -1589,7 +1592,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       CreateKeyPairResponse EC2Response = EC2SoapServiceImpl.toCreateKeyPair(
-      ServiceProvider.getInstance().getEC2Engine().createKeyPair(ec2Request));
+      JCloudsServiceProvider.getInstance().getVCloudEngine().createKeyPair(ec2Request));
       serializeResponse(response, EC2Response);
    }
 
@@ -1605,7 +1608,7 @@ public class EC2RestServlet extends HttpServlet {
       ec2Request.setKeyName(keyName);
 
       DeleteKeyPairResponse EC2Response = EC2SoapServiceImpl.toDeleteKeyPair(
-      ServiceProvider.getInstance().getEC2Engine().deleteKeyPair(ec2Request));
+      JCloudsServiceProvider.getInstance().getVCloudEngine().deleteKeyPair(ec2Request));
       serializeResponse(response, EC2Response);
    }
 
@@ -1618,7 +1621,7 @@ public class EC2RestServlet extends HttpServlet {
       }
 
       GetPasswordDataResponse EC2Response = EC2SoapServiceImpl.toGetPasswordData(
-      ServiceProvider.getInstance().getEC2Engine().getPasswordData(instanceId));
+      JCloudsServiceProvider.getInstance().getVCloudEngine().getPasswordData(instanceId));
       serializeResponse(response, EC2Response);
    }
 
@@ -1659,8 +1662,8 @@ public class EC2RestServlet extends HttpServlet {
       }
       else { response.sendError(530, "Missing SignatureMethod parameter" ); return false; }
 
-      String[] version = request.getParameterValues( "Version" );
 /*
+      String[] version = request.getParameterValues( "Version" );
       if ( null != version && 0 < version.length )
       {
          if (!version[0].equals( wsdlVersion )) {
@@ -1712,8 +1715,10 @@ public class EC2RestServlet extends HttpServlet {
       }
       else cloudSecretKey = cloudKeys.getSecretKey();
 */
-      cloudSecretKey=testsecret;
-
+      cloudSecretKey=ec2properties.getProperty("key." + cloudAccessKey);
+      if (null == cloudSecretKey) {
+         throw new PermissionDeniedException("Cinderella was not able to validate the provided access credentials");
+      }
 
       // [C] Verify the signature
       //  -> getting the query-string in this way maintains its URL encoding
