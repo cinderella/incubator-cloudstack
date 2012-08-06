@@ -505,6 +505,24 @@ public class UserVmManagerImpl implements UserVmManager, UserVmService, Manager 
         }
     }
 
+    private int getMaxDataVolumesSupported(UserVmVO vm) {
+        Long hostId = vm.getHostId();
+        if (hostId == null) {
+            hostId = vm.getLastHostId();
+        }
+        HostVO host = _hostDao.findById(hostId);
+        Integer maxDataVolumesSupported = null;
+        if (host != null) {
+            _hostDao.loadDetails(host);
+            maxDataVolumesSupported = _hypervisorCapabilitiesDao.getMaxDataVolumesLimit(host.getHypervisorType(), host.getDetail("product_version"));
+        }
+        if (maxDataVolumesSupported == null) {
+            maxDataVolumesSupported = 6;  // 6 data disks by default if nothing is specified in 'hypervisor_capabilities' table
+        }
+
+        return maxDataVolumesSupported.intValue();
+    }
+
     @Override
     @ActionEvent(eventType = EventTypes.EVENT_VOLUME_ATTACH, eventDescription = "attaching volume", async = true)
     public Volume attachVolumeToVM(AttachVolumeCmd command) {
@@ -548,10 +566,11 @@ public class UserVmManagerImpl implements UserVmManager, UserVmService, Manager 
             }
         }
 
-        // Check that the VM has less than 6 data volumes attached
+        // Check that the number of data volumes attached to VM is less than that supported by hypervisor
         List<VolumeVO> existingDataVolumes = _volsDao.findByInstanceAndType(vmId, Volume.Type.DATADISK);
-        if (existingDataVolumes.size() >= 6) {
-            throw new InvalidParameterValueException("The specified VM already has the maximum number of data disks (6). Please specify another VM.");
+        int maxDataVolumesSupported = getMaxDataVolumesSupported(vm);
+        if (existingDataVolumes.size() >= maxDataVolumesSupported) {
+            throw new InvalidParameterValueException("The specified VM already has the maximum number of data disks (" + maxDataVolumesSupported + "). Please specify another VM.");
         }
 
         // Check that the VM and the volume are in the same zone
@@ -2912,6 +2931,8 @@ public class UserVmManagerImpl implements UserVmManager, UserVmService, Manager 
         c.addCriteria(Criteria.GROUPID, cmd.getGroupId());
         c.addCriteria(Criteria.FOR_VIRTUAL_NETWORK, cmd.getForVirtualNetwork());
         c.addCriteria(Criteria.NETWORKID, cmd.getNetworkId());
+        c.addCriteria(Criteria.TEMPLATE_ID, cmd.getTemplateId());
+        c.addCriteria(Criteria.ISO_ID, cmd.getIsoId());
 
         if (domainId != null) {
             c.addCriteria(Criteria.DOMAINID, domainId);
@@ -2961,6 +2982,8 @@ public class UserVmManagerImpl implements UserVmManager, UserVmService, Manager 
         Object networkId = c.getCriteria(Criteria.NETWORKID);
         Object hypervisor = c.getCriteria(Criteria.HYPERVISOR);
         Object storageId = c.getCriteria(Criteria.STORAGE_ID);
+        Object templateId = c.getCriteria(Criteria.TEMPLATE_ID);
+        Object isoId = c.getCriteria(Criteria.ISO_ID);
 
         sb.and("displayName", sb.entity().getDisplayName(), SearchCriteria.Op.LIKE);
         sb.and("id", sb.entity().getId(), SearchCriteria.Op.EQ);
@@ -2973,6 +2996,8 @@ public class UserVmManagerImpl implements UserVmManager, UserVmService, Manager 
         sb.and("hypervisorType", sb.entity().getHypervisorType(), SearchCriteria.Op.EQ);
         sb.and("hostIdEQ", sb.entity().getHostId(), SearchCriteria.Op.EQ);
         sb.and("hostIdIN", sb.entity().getHostId(), SearchCriteria.Op.IN);
+        sb.and("templateId", sb.entity().getTemplateId(), SearchCriteria.Op.EQ);
+        sb.and("isoId", sb.entity().getTemplateId(), SearchCriteria.Op.EQ);
 
         if (groupId != null && (Long) groupId == -1) {
             SearchBuilder<InstanceGroupVMMapVO> vmSearch = _groupVMMapDao.createSearchBuilder();
@@ -3045,6 +3070,14 @@ public class UserVmManagerImpl implements UserVmManager, UserVmService, Manager 
 
         if (id != null) {
             sc.setParameters("id", id);
+        }
+        
+        if (templateId != null) {
+            sc.setParameters("templateId", templateId);
+        }
+        
+        if (isoId != null) {
+            sc.setParameters("isoId", isoId);
         }
 
         if (networkId != null) {

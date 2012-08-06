@@ -1,3 +1,19 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 /** Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
  *  distributed with this work for additional information
@@ -172,6 +188,13 @@ public class NiciraNvpApi {
         return lsp.getUuid();
     }
     
+    public ControlClusterStatus getControlClusterStatus() throws NiciraNvpApiException {
+        String uri = "/ws.v1/control-cluster/status";
+        ControlClusterStatus ccs = executeRetrieveObject(new TypeToken<ControlClusterStatus>(){}.getType(), uri, null);
+
+        return ccs;
+    }
+
     private <T> void executeUpdateObject(T newObject, String uri, Map<String,String> parameters) throws NiciraNvpApiException {
         String url;
         try {
@@ -272,11 +295,13 @@ public class NiciraNvpApi {
             
         GetMethod gm = new GetMethod(url);
         gm.setRequestHeader("Content-Type", "application/json");
-        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(parameters.size());
-        for (Entry<String,String> e : parameters.entrySet()) {
-            nameValuePairs.add(new NameValuePair(e.getKey(), e.getValue()));
+        if (parameters != null && !parameters.isEmpty()) {
+	        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(parameters.size());
+	        for (Entry<String,String> e : parameters.entrySet()) {
+	            nameValuePairs.add(new NameValuePair(e.getKey(), e.getValue()));
+	        }
+	        gm.setQueryString(nameValuePairs.toArray(new NameValuePair[0]));
         }
-        gm.setQueryString(nameValuePairs.toArray(new NameValuePair[0]));
                 
         executeMethod(gm);
         

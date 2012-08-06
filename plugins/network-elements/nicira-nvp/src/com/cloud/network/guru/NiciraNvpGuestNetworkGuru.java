@@ -1,3 +1,19 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 /** Licensed to the Apache Software Foundation (ASF) under one
  *  or more contributor license agreements.  See the NOTICE file
  *  distributed with this work for additional information
@@ -160,9 +176,9 @@ public class NiciraNvpGuestNetworkGuru extends GuestNetworkGuru {
         }
         
         // Name is either the given name or the uuid
-        String name = implemented.getName();
+        String name = network.getName();
         if (name == null || name.isEmpty()) {
-            name = implemented.getUuid();
+            name = ((NetworkVO)network).getUuid();
         }
         if (name.length() > 40 ) {
             name = name.substring(0, 39); // max length 40
@@ -179,7 +195,7 @@ public class NiciraNvpGuestNetworkGuru extends GuestNetworkGuru {
         String transportzoneuuid = niciraNvpHost.getDetail("transportzoneuuid");
         String transportzoneisotype = niciraNvpHost.getDetail("transportzoneisotype");
         
-        CreateLogicalSwitchCommand cmd = new CreateLogicalSwitchCommand(transportzoneuuid, transportzoneisotype, network.getName(), 
+        CreateLogicalSwitchCommand cmd = new CreateLogicalSwitchCommand(transportzoneuuid, transportzoneisotype, name,
                 context.getDomain().getName() + "-" + context.getAccount().getAccountName());
         CreateLogicalSwitchAnswer answer = (CreateLogicalSwitchAnswer) _agentMgr.easySend(niciraNvpHost.getId(), cmd);
         

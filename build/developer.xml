@@ -35,6 +35,7 @@
   <property name="unittest.dir" location="${base.dir}/unittest"/>
   <property name="unittest.target.dir" location="${unittest.dir}/classes"/>
   <property name="unittest.jar.dir" location="${unittest.dir}/jar"/>
+  <property name="unittest.formatter" value="plain" />
   <property name="ovm.dir" location="${base.dir}/ovm" />
   
   <!-- directories for api doc -->
@@ -241,7 +242,7 @@
     </condition>
   	
     <echo message="deploydb ${server-setup.file} ${templates.file} ${DBROOTPW}" />
-    <exec dir="${db.scripts.dir}" executable="bash">
+    <exec dir="${db.scripts.dir}" executable="bash" failonerror="true">
       <arg value="deploy-db-dev.sh" />
       <arg value="${server-setup.file}" />
       <arg value="${templates.file}" />
@@ -269,7 +270,7 @@
     </condition>
   	
     <echo message="deploydb ${server-setup.file} ${templates.file} ${DBROOTPW}" />
-    <exec dir="${db.scripts.dir}" executable="bash">
+    <exec dir="${db.scripts.dir}" executable="bash" failonerror="true">
       <arg value="deploy-db-simulator.sh" />
       <arg value="${server-setup.file}" />
       <arg value="${templates.file}" />
@@ -318,12 +319,13 @@
       <classpath refid="test.classpath"/>
       <jvmarg value="${debug.jvmarg}"/>
       <batchtest todir="${unittest.dir}">
-        <formatter type="plain"/>
+        <formatter type="${unittest.formatter}"/>
         <fileset dir="${utils.test.dir}">
           <include name="**/*Test.java"/>
         </fileset>
         <fileset dir="${server.test.dir}">
           <include name="**/*Test.java"/>
+          <exclude name="**/upgrade/*.java"/>
         </fileset>
       </batchtest>
     </junit>
@@ -347,12 +349,13 @@
       <jvmarg value="-Xms1024m"/>
       <jvmarg value="-Xmx1024m"/>
       <batchtest todir="${unittest.dir}">
-        <formatter type="plain"/>
+        <formatter type="${unittest.formatter}"/>
         <fileset dir="${utils.test.dir}">
           <include name="**/${test}.java"/>
         </fileset>
         <fileset dir="${server.test.dir}">
           <include name="**/${test}.java"/>
+          <exclude name="**/upgrade/*.java"/>
         </fileset>
       </batchtest>
     </junit>
@@ -374,7 +377,7 @@
       <jvmarg value="-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y"/>
       <jvmarg value="${assertion}"/>
       <batchtest todir="${unittest.dir}">
-        <formatter type="plain"/>
+        <formatter type="${unittest.formatter}"/>
         <fileset dir="${utils.test.dir}">
           <include name="**/${test}.java"/>
         </fileset>
@@ -401,7 +404,7 @@
   	  <property name="commands.vr.file" location="${dist.dir}/client/conf/virtualrouter_commands.properties" />
   
 	<echo message="build-apidocs" />
-    <exec dir="${apidoc.scripts.dir}" executable="bash">
+    <exec dir="${apidoc.scripts.dir}" executable="bash" failonerror="true">
       <arg value="build-apidoc.sh" />
       <arg value="${target.dir}/jar" />
       <arg value="${deps.dir}" />

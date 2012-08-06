@@ -549,7 +549,14 @@
       },
 
       basicPhysicalNetwork: { //"Netscaler" now
-			  preFilter: cloudStack.preFilter.addLoadBalancerDevice,	
+        preFilter: function(args) {
+          if (args.data['network-model'] == 'Basic' && (selectedNetworkOfferingHavingELB || selectedNetworkOfferingHavingEIP)) {
+            args.$form.find('[rel=dedicated]').hide();
+          } else {
+            args.$form.find('[rel=dedicated]').show();
+          };
+          cloudStack.preFilter.addLoadBalancerDevice
+        },
         fields: {
          ip: {
             label: 'label.ip.address'
@@ -2040,9 +2047,9 @@
 											alert("addNetworkServiceProvider&name=Netscaler failed. Error: " + errorMsg);
 										}
 									});
-								});
+								}, 3000);
 							}						
-						}, 3000); 								
+						}); 								
 						//add netscaler provider (end)
 					}
 					else { //selectedNetworkOfferingHavingNetscaler == false
