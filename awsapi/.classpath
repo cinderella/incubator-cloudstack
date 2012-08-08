@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/deps"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/antlr-2.7.6.jar"/>
@@ -17,8 +18,6 @@
 	<classpathentry kind="lib" path="/deps/awsapi-lib/axis2-kernel-1.5.1.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/axis2-transport-http-1.5.1.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/axis2-transport-local-1.5.1.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/axis2.war"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/c3p0-0.9.1.2.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/cloud-gson.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/commons-codec-1.4.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/commons-collections-3.1.jar"/>
@@ -32,6 +31,8 @@
 	<classpathentry kind="lib" path="/deps/awsapi-lib/javassist-3.9.0.GA.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/jaxb-api-2.1.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/jaxb-impl-2.1.7.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/jaxb-xjc-2.1.7.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/jsch-0.1.42.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/json_simple-1.1.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/jta-1.1.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/junit-4.8.1.jar"/>
@@ -46,15 +47,21 @@
 	<classpathentry kind="lib" path="/deps/awsapi-lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/XmlSchema-1.4.3.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/jaxb-xjc-2.1.7.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/guava-12.0.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/guice-3.0.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-bouncycastle-1.5.0-beta.9.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-compute-1.5.0-beta.9.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-core-1.5.0-beta.9.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-enterprise-1.5.0-beta.9.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-scriptbuilder-1.5.0-beta.9.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-slf4j-1.5.0-beta.9.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/vcloud-1.5.0-beta.9.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/bcprov-jdk16-145.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/commons-collections-3.1.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/joda-time-1.5.2.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/opensaml-1.1.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/opensaml-2.2.3.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/openws-1.2.2.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/rampart-core-1.5.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/rampart-policy-1.5.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/rampart-trust-1.5.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/slf4j-api-1.5.11.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/slf4j-jdk14-1.5.11.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/velocity-1.5.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/wss4j-1.5.8.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/xmlsec-1.4.2.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/xmltooling-1.2.0.jar"/>
+	<classpathentry kind="lib" path="/deps/cloud-servlet-api.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -155,6 +155,7 @@ import com.cloud.agent.api.to.VirtualMachineTO;
 import com.cloud.agent.api.to.VolumeTO;
 import com.cloud.hypervisor.kvm.resource.KVMHABase.NfsStoragePool;
 import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.ConsoleDef;
+import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.CpuTuneDef;
 import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.DevicesDef;
 import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.DiskDef;
 import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.DiskDef.diskProtocol;
@@ -2475,6 +2476,10 @@ public class LibvirtComputingResource extends ServerResourceBase implements
         grd.setVcpuNum(vmTO.getCpus());
         vm.addComp(grd);
 
+        CpuTuneDef ctd = new CpuTuneDef();
+        ctd.setShares(vmTO.getCpus() * vmTO.getSpeed());
+        vm.addComp(ctd);
+
         FeaturesDef features = new FeaturesDef();
         features.addFeatures("pae");
         features.addFeatures("apic");
@@ -2550,9 +2555,6 @@ public class LibvirtComputingResource extends ServerResourceBase implements
 
             s_logger.debug("starting " + vmName + ": " + vm.toString());
             startDomain(conn, vmName, vm.toString());
-            Script.runSimpleBashScript("virsh schedinfo " + vmName
-                    + " --set cpu_shares=" + vmSpec.getCpus()
-                    * vmSpec.getSpeed());
 
             NicTO[] nics = vmSpec.getNics();
             for (NicTO nic : nics) {
@@ -3595,23 +3597,13 @@ public class LibvirtComputingResource extends ServerResourceBase implements
     }
 
     private String getHypervisorPath(Connect conn) {
-        File f = new File("/usr/bin/cloud-qemu-kvm");
-        if (f.exists()) {
-            return "/usr/bin/cloud-qemu-kvm";
-        } else {
-            f = new File("/usr/libexec/cloud-qemu-kvm");
-            if (f.exists()) {
-                return "/usr/libexec/cloud-qemu-kvm";
-            }
-
-            LibvirtCapXMLParser parser = new LibvirtCapXMLParser();
-            try {
-                parser.parseCapabilitiesXML(conn.getCapabilities());
-            } catch (LibvirtException e) {
-
-            }
-            return parser.getEmulator();
+        LibvirtCapXMLParser parser = new LibvirtCapXMLParser();
+        try {
+            parser.parseCapabilitiesXML(conn.getCapabilities());
+        } catch (LibvirtException e) {
+            s_logger.debug(e.getMessage());
         }
+        return parser.getEmulator();
     }
 
     private String getGuestType(Connect conn, String vmName) {
