@@ -80,7 +80,7 @@ public class ConfigurationHelper {
         if (file.exists()) {
             return file;
         }
-        return file;
+        return new File(System.getProperty("user.dir"), name);
 	}
 
 	public static ServletContext getServletContext()
