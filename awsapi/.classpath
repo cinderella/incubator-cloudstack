@@ -32,7 +32,6 @@
 	<classpathentry kind="lib" path="/deps/awsapi-lib/jaxb-api-2.1.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/jaxb-impl-2.1.7.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/jaxb-xjc-2.1.7.jar"/>
-	<classpathentry kind="lib" path="/deps/awsapi-lib/jsch-0.1.42.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/json_simple-1.1.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/jta-1.1.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/junit-4.8.1.jar"/>
@@ -63,5 +62,14 @@
 	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/xmlsec-1.4.2.jar"/>
 	<classpathentry kind="lib" path="/deps/awsapi-lib/rampart-lib/xmltooling-1.2.0.jar"/>
 	<classpathentry kind="lib" path="/deps/cloud-servlet-api.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-bouncycastle-1.5.0-beta.9.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-compute-1.5.0-beta.9.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-core-1.5.0-beta.9.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-enterprise-1.5.0-beta.9.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-scriptbuilder-1.5.0-beta.9.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/jclouds-slf4j-1.5.0-beta.9.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/vcloud-1.5.0-beta.9.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/guava-12.0.jar"/>
+	<classpathentry kind="lib" path="/deps/awsapi-lib/guice-3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
