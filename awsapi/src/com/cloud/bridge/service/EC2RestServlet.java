@@ -18,7 +18,6 @@ package com.cloud.bridge.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -127,6 +126,7 @@ import com.cloud.bridge.service.exception.PermissionDeniedException;
 import com.cloud.bridge.util.ConfigurationHelper;
 import com.cloud.bridge.util.EC2RestAuth;
 import com.google.common.base.Supplier;
+import com.google.common.base.Throwables;
 
 public abstract class EC2RestServlet extends HttpServlet implements Supplier<EC2Engine> {
 
@@ -137,10 +137,11 @@ public abstract class EC2RestServlet extends HttpServlet implements Supplier<EC2
    private OMFactory factory = OMAbstractFactory.getOMFactory();
    private XMLOutputFactory xmlOutFactory = XMLOutputFactory.newInstance();
 
-   private String wsdlVersion = null;
    private Properties ec2properties = null;
 
-   boolean debug = true;
+   private boolean debug = true;
+
+   private String wsdlVersion = null;
 
    /**
     * We build the path to where the keystore holding the WS-Security X509
@@ -158,18 +159,10 @@ public abstract class EC2RestServlet extends HttpServlet implements Supplier<EC2
          logger.info("Use EC2 properties file: " + propertiesFile.getAbsolutePath());
          try {
             ec2properties.load(new FileInputStream(propertiesFile));
-         } catch (FileNotFoundException e) {
-            logger.warn("Unable to open properties file: " + propertiesFile.getAbsolutePath(), e);
+            wsdlVersion = ec2properties.getProperty("WSDLVersion", "2010-11-15");
          } catch (IOException e) {
-            logger.warn("Unable to read properties file: " + propertiesFile.getAbsolutePath(), e);
+            throw Throwables.propagate(e);
          }
-         wsdlVersion = ec2properties.getProperty("WSDLVersion", "2010-11-15");
-
-         String installedPath = System.getenv("CATALINA_HOME");
-         if (installedPath == null)
-            installedPath = System.getenv("CATALINA_BASE");
-         if (installedPath == null)
-            installedPath = System.getProperty("catalina.home");
       }
    }
 
@@ -1514,7 +1507,7 @@ public abstract class EC2RestServlet extends HttpServlet implements Supplier<EC2
        */
       cloudSecretKey = ec2properties.getProperty("key." + cloudAccessKey);
       if (null == cloudSecretKey) {
-         throw new PermissionDeniedException("Cinderella was not able to validate the provided access credentials");
+         throw new PermissionDeniedException("No secret key configured for access key: "+ cloudAccessKey);
       }
 
       // [C] Verify the signature
