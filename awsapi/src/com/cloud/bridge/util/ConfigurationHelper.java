@@ -46,6 +46,11 @@ public class ConfigurationHelper {
         	return file;
         }
 	}
+	
+   File inCwd = new File(System.getProperty("user.dir"), name);
+   if (inCwd.exists())
+      return inCwd;
+
 	ServletContext context = getServletContext();
 	if(context!=null){
 		String newPath = context.getRealPath("/");
@@ -80,7 +85,7 @@ public class ConfigurationHelper {
         if (file.exists()) {
             return file;
         }
-        return new File(System.getProperty("user.dir"), name);
+        return file;
 	}
 
 	public static ServletContext getServletContext()
