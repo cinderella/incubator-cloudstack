@@ -21,79 +21,28 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
+import com.cloud.bridge.service.core.ec2.*;
 import org.apache.log4j.Logger;
 import org.jclouds.Constants;
 import org.jclouds.ContextBuilder;
-import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
-import org.jclouds.vcloud.VCloudApiMetadata;
-import org.jclouds.vcloud.VCloudClient;
-import org.jclouds.vcloud.domain.Catalog;
-import org.jclouds.vcloud.domain.CatalogItem;
-import org.jclouds.vcloud.domain.Org;
-import org.jclouds.vcloud.domain.ReferenceType;
-import org.jclouds.vcloud.domain.network.FirewallService;
-import org.jclouds.vcloud.domain.network.firewall.FirewallRule;
+import org.jclouds.rest.RestContext;
+import org.jclouds.vcloud.director.v1_5.VCloudDirectorContext;
+import org.jclouds.vcloud.director.v1_5.admin.VCloudDirectorAdminApi;
+import org.jclouds.vcloud.director.v1_5.admin.VCloudDirectorAdminAsyncApi;
+import org.jclouds.vcloud.director.v1_5.domain.*;
+import org.jclouds.vcloud.director.v1_5.domain.network.FirewallRule;
+import org.jclouds.vcloud.director.v1_5.domain.network.FirewallService;
+import org.jclouds.vcloud.director.v1_5.domain.org.AdminOrg;
+import org.jclouds.vcloud.director.v1_5.domain.query.QueryResultRecordType;
+import org.jclouds.vcloud.director.v1_5.domain.query.QueryResultRecords;
+import org.jclouds.vcloud.director.v1_5.user.VCloudDirectorApi;
 
 import com.cloud.bridge.service.EC2Engine;
-import com.cloud.bridge.service.core.ec2.EC2Address;
-import com.cloud.bridge.service.core.ec2.EC2AssociateAddress;
-import com.cloud.bridge.service.core.ec2.EC2AuthorizeRevokeSecurityGroup;
-import com.cloud.bridge.service.core.ec2.EC2AvailabilityZonesFilterSet;
-import com.cloud.bridge.service.core.ec2.EC2CreateImage;
-import com.cloud.bridge.service.core.ec2.EC2CreateImageResponse;
-import com.cloud.bridge.service.core.ec2.EC2CreateKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2CreateVolume;
-import com.cloud.bridge.service.core.ec2.EC2DeleteKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2DescribeAddresses;
-import com.cloud.bridge.service.core.ec2.EC2DescribeAddressesResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeAvailabilityZones;
-import com.cloud.bridge.service.core.ec2.EC2DescribeAvailabilityZonesResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeImageAttribute;
-import com.cloud.bridge.service.core.ec2.EC2DescribeImages;
-import com.cloud.bridge.service.core.ec2.EC2DescribeImagesResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeInstances;
-import com.cloud.bridge.service.core.ec2.EC2DescribeInstancesResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeKeyPairs;
-import com.cloud.bridge.service.core.ec2.EC2DescribeKeyPairsResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeSecurityGroups;
-import com.cloud.bridge.service.core.ec2.EC2DescribeSecurityGroupsResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeSnapshots;
-import com.cloud.bridge.service.core.ec2.EC2DescribeSnapshotsResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeTags;
-import com.cloud.bridge.service.core.ec2.EC2DescribeTagsResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeVolumes;
-import com.cloud.bridge.service.core.ec2.EC2DescribeVolumesResponse;
-import com.cloud.bridge.service.core.ec2.EC2DisassociateAddress;
-import com.cloud.bridge.service.core.ec2.EC2GroupFilterSet;
-import com.cloud.bridge.service.core.ec2.EC2Image;
-import com.cloud.bridge.service.core.ec2.EC2ImageAttributes;
-import com.cloud.bridge.service.core.ec2.EC2ImportKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2InstanceFilterSet;
-import com.cloud.bridge.service.core.ec2.EC2IpPermission;
-import com.cloud.bridge.service.core.ec2.EC2ModifyImageAttribute;
-import com.cloud.bridge.service.core.ec2.EC2PasswordData;
-import com.cloud.bridge.service.core.ec2.EC2RebootInstances;
-import com.cloud.bridge.service.core.ec2.EC2RegisterImage;
-import com.cloud.bridge.service.core.ec2.EC2ReleaseAddress;
-import com.cloud.bridge.service.core.ec2.EC2RunInstances;
-import com.cloud.bridge.service.core.ec2.EC2RunInstancesResponse;
-import com.cloud.bridge.service.core.ec2.EC2SSHKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2SecurityGroup;
-import com.cloud.bridge.service.core.ec2.EC2Snapshot;
-import com.cloud.bridge.service.core.ec2.EC2SnapshotFilterSet;
-import com.cloud.bridge.service.core.ec2.EC2StartInstances;
-import com.cloud.bridge.service.core.ec2.EC2StartInstancesResponse;
-import com.cloud.bridge.service.core.ec2.EC2StopInstances;
-import com.cloud.bridge.service.core.ec2.EC2StopInstancesResponse;
-import com.cloud.bridge.service.core.ec2.EC2TagKeyValue;
-import com.cloud.bridge.service.core.ec2.EC2Tags;
-import com.cloud.bridge.service.core.ec2.EC2Volume;
-import com.cloud.bridge.service.core.ec2.EC2VolumeFilterSet;
 import com.cloud.bridge.service.exception.EC2ServiceException;
 import com.cloud.bridge.service.exception.EC2ServiceException.ClientError;
 import com.cloud.bridge.service.exception.EC2ServiceException.ServerError;
@@ -113,8 +62,11 @@ public class JCloudsEC2Engine implements EC2Engine {
    private String endpoint = null;
    private String useratorg = null;
    private String password = null;
-   private ComputeServiceContext computeContext;
-   private VCloudClient vcloudApi = null;
+
+   private VCloudDirectorContext context;
+   private RestContext<VCloudDirectorAdminApi, VCloudDirectorAdminAsyncApi> adminContext;
+   private VCloudDirectorApi vcloudApi;
+   private VCloudDirectorAdminApi vcloudAdminApi;
 
    Properties ec2properties = null;
 
@@ -155,26 +107,39 @@ public class JCloudsEC2Engine implements EC2Engine {
     *
     * @return
     */
-   private VCloudClient getApi() {
+   private VCloudDirectorApi getApi() {
       if (vcloudApi == null) {
          Properties overrides = new Properties();
          overrides.setProperty(Constants.PROPERTY_TRUST_ALL_CERTS, "true");
          overrides.setProperty(Constants.PROPERTY_RELAX_HOSTNAME, "true");
-         computeContext = ContextBuilder.newBuilder("vcloud")
+         ContextBuilder builder = ContextBuilder.newBuilder("vcloud-director")
                                         .endpoint(endpoint)
                                         .credentials(useratorg, password)
                                         .modules(ImmutableSet.<Module>builder()
                                           .add(new SLF4JLoggingModule())
                                           .add(new EnterpriseConfigurationModule()).build())
-                                        .overrides(overrides)
-                                        .buildView(ComputeServiceContext.class);
+                                        .overrides(overrides);
 
-         computeContext.utils().injector().injectMembers(this);
-         vcloudApi = computeContext.unwrap(VCloudApiMetadata.CONTEXT_TOKEN).getApi();
+         context = VCloudDirectorContext.class.cast(builder.build());
+
+         context.utils().injector().injectMembers(this);
+         adminContext = context.getAdminContext();
+
+         vcloudApi = context.getApi();
       }
       return ( vcloudApi != null ? vcloudApi : null );
    }
 
+   private VCloudDirectorAdminApi getAdminApi() {
+      if (vcloudAdminApi == null) {
+         if (vcloudApi == null) {
+            getApi();
+         }
+         vcloudAdminApi = adminContext.getApi();
+      }
+
+      return vcloudAdminApi;
+   }
 
    /**
     * Verifies account can access CloudStack
@@ -1134,6 +1099,32 @@ public class JCloudsEC2Engine implements EC2Engine {
    }
 
    /* (non-Javadoc)
+    * @see com.cloud.bridge.service.core.ec2.EC2Engine1#handleRequest(com.cloud.bridge.service.core.ec2.EC2DescribeAvailabilityZones)
+    */
+   @Override
+   public EC2DescribeRegionsResponse handleRequest(EC2DescribeRegions request) {
+      try {
+         EC2DescribeRegionsResponse availableRegions = listRegions(request.getRegionSet(), null);
+         EC2RegionsFilterSet regionsFilterSet = request.getFilterSet();
+         if ( null == regionsFilterSet )
+            return availableRegions;
+         else {
+            List<String> matchedRegions = regionsFilterSet.evaluate(availableRegions);
+            if (matchedRegions.isEmpty())
+               return new EC2DescribeRegionsResponse();
+            return listRegions(matchedRegions.toArray(new String[0]), null);
+         }
+      } catch( EC2ServiceException error ) {
+         logger.error( "EC2 DescribeAvailabilityZones - ", error);
+         throw error;
+
+      } catch( Exception e ) {
+         logger.error( "EC2 DescribeAvailabilityZones - " ,e);
+         throw new EC2ServiceException(ServerError.InternalError, e.getMessage() != null ? e.getMessage() : "An unexpected error occurred.");
+      }
+   }
+
+   /* (non-Javadoc)
     * @see com.cloud.bridge.service.core.ec2.EC2Engine1#handleRequest(com.cloud.bridge.service.core.ec2.EC2DescribeVolumes)
     */
    @Override
@@ -1735,30 +1726,27 @@ public class JCloudsEC2Engine implements EC2Engine {
    }
 
    /**
-    * Translate the given zone name into the required zoneId.  Query for
-    * a list of all zones and match the zone name given.   Amazon uses zone
-    * names while the Cloud API often requires the zoneId.
+    * More than one place we need to access the defined list of zones.  If given a specific
+    * list of zones of interest, then only values from those zones are returned.
     *
-    * @param zoneName - (e.g., 'AH'), if null return the first zone in the available list
+    * @param interestedZones - can be null, should be a subset of all zones
     *
-    * @return the zoneId that matches the given zone name
+    * @return EC2DescribeAvailabilityZonesResponse
     */
-   private String toZoneId(String zoneName, String domainId) throws Exception	{
-      EC2DescribeAvailabilityZonesResponse zones = null;
-      String[] interestedZones = null;
+   private EC2DescribeAvailabilityZonesResponse listZones(String[] interestedZones, String domainId) throws Exception
+   {
+//      throw new EC2ServiceException(ServerError.InternalError, "Not implemented in Cinderella");
+      EC2DescribeAvailabilityZonesResponse zones = new EC2DescribeAvailabilityZonesResponse();
 
-      if ( null != zoneName) {
-         interestedZones = new String[1];
-         interestedZones[0] = zoneName;
-      }else {
-         //TODO: default zone
+      QueryResultRecords queryResult = getApi().getQueryApi().vAppsQueryAll();
+      for (QueryResultRecordType record : queryResult.getRecords()) {
+         VApp vapp = getApi().getVAppApi().getVApp(record.getHref());
+         if (vapp.getName().matches("^cin_az_.*")) {
+            zones.addZone(vapp.getName(), vapp.getDescription());
+         }
       }
 
-      zones = listZones(interestedZones, domainId);
-
-      if (zones == null || zones.getZoneIdAt( 0 ) == null)
-         throw new EC2ServiceException(ClientError.InvalidParameterValue, "Unknown zoneName value - " + zoneName);
-      return zones.getZoneIdAt(0);
+      return zones;
    }
 
    /**
@@ -1769,30 +1757,20 @@ public class JCloudsEC2Engine implements EC2Engine {
     *
     * @return EC2DescribeAvailabilityZonesResponse
     */
-   private EC2DescribeAvailabilityZonesResponse listZones(String[] interestedZones, String domainId) throws Exception
+   private EC2DescribeRegionsResponse listRegions(String[] interestedRegions, String domainId) throws Exception
    {
-      throw new EC2ServiceException(ServerError.InternalError, "Not implemented in Cinderella");
-/*
-      EC2DescribeAvailabilityZonesResponse zones = new EC2DescribeAvailabilityZonesResponse();
+//      throw new EC2ServiceException(ServerError.InternalError, "Not implemented in Cinderella");
+      EC2DescribeRegionsResponse regions = new EC2DescribeRegionsResponse();
 
-      List<CloudStackZone> cloudZones = getApi().listZones(true, domainId, null, null);
-
-      if(cloudZones != null) {
-         for(CloudStackZone cloudZone : cloudZones) {
-            if ( null != interestedZones && 0 < interestedZones.length ) {
-               for( int j=0; j < interestedZones.length; j++ ) {
-                  if (interestedZones[j].equalsIgnoreCase( cloudZone.getName())) {
-                     zones.addZone(cloudZone.getId().toString(), cloudZone.getName());
-                     break;
-                  }
-               }
-            } else {
-               zones.addZone(cloudZone.getId().toString(), cloudZone.getName());
-            }
+      QueryResultRecords queryResult = getApi().getQueryApi().vAppsQueryAll();
+      for (QueryResultRecordType record : queryResult.getRecords()) {
+         VApp vapp = getApi().getVAppApi().getVApp(record.getHref());
+         if (vapp.getName().matches("^cin_az_.*")) {
+            regions.addRegion(vapp.getName(), vapp.getDescription());
          }
       }
-      return zones;
-*/
+
+      return regions;
    }
 
 
@@ -1885,33 +1863,37 @@ public class JCloudsEC2Engine implements EC2Engine {
     */
    private EC2DescribeImagesResponse listTemplates( String templateId, EC2DescribeImagesResponse images ) throws EC2ServiceException {
 //      throw new EC2ServiceException(ServerError.InternalError, "Not implemented in Cinderella");
-      Org org = getApi().getOrgClient().findOrgNamed(null);
+//      Reference org = Iterables.getFirst(getApi().getOrgApi().getOrgList().getOrgs(), null);
 
-      for (ReferenceType catref : org.getCatalogs().values()) {
-         Catalog catalog = vcloudApi.getCatalogClient().getCatalog(catref.getHref());
-         for (ReferenceType itemref : catalog.values()) {
-            CatalogItem item = vcloudApi.getCatalogClient().getCatalogItem(itemref.getHref());
-            EC2Image ec2Image = new EC2Image();
-            ec2Image.setId(item.getName());
-            ec2Image.setAccountName(org.getHref().toString());
-            ec2Image.setName(item.getName());
-            ec2Image.setDescription(item.getDescription());
+      for (Reference org : getApi().getOrgApi().getOrgList().getOrgs()) {
+         AdminOrg adminOrg = getAdminApi().getOrgApi().getOrg(org.toAdminReference(endpoint).getHref());
+
+         for (Reference catref : adminOrg.getCatalogs()) {
+            Catalog catalog = getApi().getCatalogApi().getCatalog(catref.getHref());
+            for (Reference itemref : catalog.getCatalogItems()) {
+               CatalogItem item = getApi().getCatalogApi().getCatalogItem(itemref.getHref());
+               EC2Image ec2Image = new EC2Image();
+               ec2Image.setId(item.getName());
+               ec2Image.setAccountName(org.getHref().toString());
+               ec2Image.setName(item.getName());
+               ec2Image.setDescription(item.getDescription());
 //            ec2Image.setOsTypeId(temp.getOsTypeId().toString());
 //            ec2Image.setIsPublic(temp.getIsPublic());
 //            ec2Image.setIsReady(temp.getIsReady());
 //            ec2Image.setDomainId(temp.getDomainId());
 //            Multimap<String, String> resourceTags = temp.getTags();
-            for(Map.Entry<String, String> resourceTag : item.getProperties().entrySet()) {
-               EC2TagKeyValue param = new EC2TagKeyValue();
-               param.setKey(resourceTag.getKey());
-               if (resourceTag.getValue() != null)
-                  param.setValue(resourceTag.getValue());
-               ec2Image.addResourceTag(param);
+               for(Property resourceTag : item.getProperties()) {
+                  EC2TagKeyValue param = new EC2TagKeyValue();
+                  param.setKey(resourceTag.getKey());
+                  if (resourceTag.getValue() != null)
+                     param.setValue(resourceTag.getValue());
+                  ec2Image.addResourceTag(param);
+               }
+               images.addImage(ec2Image);
+
             }
-            images.addImage(ec2Image);
 
          }
-
       }
 
       return images;
@@ -1970,7 +1952,7 @@ public class JCloudsEC2Engine implements EC2Engine {
     * @return
     */
    private boolean toPermission(EC2SecurityGroup response, FirewallService fw ) {
-      List<FirewallRule> rules = fw.getFirewallRules();
+      Set<FirewallRule> rules = fw.getFirewallRules();
 
       if (rules == null || rules.isEmpty()) return false;
 

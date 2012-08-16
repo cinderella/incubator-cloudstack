@@ -1,51 +1,6 @@
 package com.cloud.bridge.service;
 
-import com.cloud.bridge.service.core.ec2.EC2Address;
-import com.cloud.bridge.service.core.ec2.EC2AssociateAddress;
-import com.cloud.bridge.service.core.ec2.EC2AuthorizeRevokeSecurityGroup;
-import com.cloud.bridge.service.core.ec2.EC2CreateImage;
-import com.cloud.bridge.service.core.ec2.EC2CreateImageResponse;
-import com.cloud.bridge.service.core.ec2.EC2CreateKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2CreateVolume;
-import com.cloud.bridge.service.core.ec2.EC2DeleteKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2DescribeAddresses;
-import com.cloud.bridge.service.core.ec2.EC2DescribeAddressesResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeAvailabilityZones;
-import com.cloud.bridge.service.core.ec2.EC2DescribeAvailabilityZonesResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeImageAttribute;
-import com.cloud.bridge.service.core.ec2.EC2DescribeImages;
-import com.cloud.bridge.service.core.ec2.EC2DescribeImagesResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeInstances;
-import com.cloud.bridge.service.core.ec2.EC2DescribeInstancesResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeKeyPairs;
-import com.cloud.bridge.service.core.ec2.EC2DescribeKeyPairsResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeSecurityGroups;
-import com.cloud.bridge.service.core.ec2.EC2DescribeSecurityGroupsResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeSnapshots;
-import com.cloud.bridge.service.core.ec2.EC2DescribeSnapshotsResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeTags;
-import com.cloud.bridge.service.core.ec2.EC2DescribeTagsResponse;
-import com.cloud.bridge.service.core.ec2.EC2DescribeVolumes;
-import com.cloud.bridge.service.core.ec2.EC2DescribeVolumesResponse;
-import com.cloud.bridge.service.core.ec2.EC2DisassociateAddress;
-import com.cloud.bridge.service.core.ec2.EC2Image;
-import com.cloud.bridge.service.core.ec2.EC2ImageAttributes;
-import com.cloud.bridge.service.core.ec2.EC2ImportKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2ModifyImageAttribute;
-import com.cloud.bridge.service.core.ec2.EC2PasswordData;
-import com.cloud.bridge.service.core.ec2.EC2RebootInstances;
-import com.cloud.bridge.service.core.ec2.EC2RegisterImage;
-import com.cloud.bridge.service.core.ec2.EC2ReleaseAddress;
-import com.cloud.bridge.service.core.ec2.EC2RunInstances;
-import com.cloud.bridge.service.core.ec2.EC2RunInstancesResponse;
-import com.cloud.bridge.service.core.ec2.EC2SSHKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2Snapshot;
-import com.cloud.bridge.service.core.ec2.EC2StartInstances;
-import com.cloud.bridge.service.core.ec2.EC2StartInstancesResponse;
-import com.cloud.bridge.service.core.ec2.EC2StopInstances;
-import com.cloud.bridge.service.core.ec2.EC2StopInstancesResponse;
-import com.cloud.bridge.service.core.ec2.EC2Tags;
-import com.cloud.bridge.service.core.ec2.EC2Volume;
+import com.cloud.bridge.service.core.ec2.*;
 
 public interface EC2Engine {
 
@@ -272,6 +227,14 @@ public interface EC2Engine {
     * @return
     */
    EC2DescribeAvailabilityZonesResponse handleRequest(EC2DescribeAvailabilityZones request);
+
+   /**
+    * list Zones
+    *
+    * @param request
+    * @return
+    */
+   EC2DescribeRegionsResponse handleRequest(EC2DescribeRegions request);
 
    /**
     * list volumes

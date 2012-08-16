@@ -42,6 +42,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.amazon.ec2.*;
+import com.cloud.bridge.service.core.ec2.*;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.AxisFault;
@@ -51,75 +53,6 @@ import org.apache.axis2.databinding.utils.writer.MTOMAwareXMLSerializer;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
-import com.amazon.ec2.AllocateAddressResponse;
-import com.amazon.ec2.AssociateAddressResponse;
-import com.amazon.ec2.AttachVolumeResponse;
-import com.amazon.ec2.AuthorizeSecurityGroupIngressResponse;
-import com.amazon.ec2.CreateImageResponse;
-import com.amazon.ec2.CreateKeyPairResponse;
-import com.amazon.ec2.CreateSecurityGroupResponse;
-import com.amazon.ec2.CreateSnapshotResponse;
-import com.amazon.ec2.CreateVolumeResponse;
-import com.amazon.ec2.DeleteKeyPairResponse;
-import com.amazon.ec2.DeleteSecurityGroupResponse;
-import com.amazon.ec2.DeleteSnapshotResponse;
-import com.amazon.ec2.DeleteVolumeResponse;
-import com.amazon.ec2.DeregisterImageResponse;
-import com.amazon.ec2.DescribeAvailabilityZonesResponse;
-import com.amazon.ec2.DescribeImageAttributeResponse;
-import com.amazon.ec2.DescribeImagesResponse;
-import com.amazon.ec2.DescribeInstanceAttributeResponse;
-import com.amazon.ec2.DescribeInstancesResponse;
-import com.amazon.ec2.DescribeKeyPairsResponse;
-import com.amazon.ec2.DescribeSecurityGroupsResponse;
-import com.amazon.ec2.DescribeSnapshotsResponse;
-import com.amazon.ec2.DescribeVolumesResponse;
-import com.amazon.ec2.DetachVolumeResponse;
-import com.amazon.ec2.DisassociateAddressResponse;
-import com.amazon.ec2.GetPasswordDataResponse;
-import com.amazon.ec2.ImportKeyPairResponse;
-import com.amazon.ec2.ModifyImageAttributeResponse;
-import com.amazon.ec2.RebootInstancesResponse;
-import com.amazon.ec2.RegisterImageResponse;
-import com.amazon.ec2.ReleaseAddressResponse;
-import com.amazon.ec2.ResetImageAttributeResponse;
-import com.amazon.ec2.RevokeSecurityGroupIngressResponse;
-import com.amazon.ec2.RunInstancesResponse;
-import com.amazon.ec2.StartInstancesResponse;
-import com.amazon.ec2.StopInstancesResponse;
-import com.amazon.ec2.TerminateInstancesResponse;
-import com.cloud.bridge.service.core.ec2.EC2AssociateAddress;
-import com.cloud.bridge.service.core.ec2.EC2AuthorizeRevokeSecurityGroup;
-import com.cloud.bridge.service.core.ec2.EC2CreateImage;
-import com.cloud.bridge.service.core.ec2.EC2CreateKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2CreateVolume;
-import com.cloud.bridge.service.core.ec2.EC2DeleteKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2DescribeAddresses;
-import com.cloud.bridge.service.core.ec2.EC2DescribeAvailabilityZones;
-import com.cloud.bridge.service.core.ec2.EC2DescribeImages;
-import com.cloud.bridge.service.core.ec2.EC2DescribeInstances;
-import com.cloud.bridge.service.core.ec2.EC2DescribeKeyPairs;
-import com.cloud.bridge.service.core.ec2.EC2DescribeSecurityGroups;
-import com.cloud.bridge.service.core.ec2.EC2DescribeSnapshots;
-import com.cloud.bridge.service.core.ec2.EC2DescribeVolumes;
-import com.cloud.bridge.service.core.ec2.EC2DisassociateAddress;
-import com.cloud.bridge.service.core.ec2.EC2Filter;
-import com.cloud.bridge.service.core.ec2.EC2GroupFilterSet;
-import com.cloud.bridge.service.core.ec2.EC2Image;
-import com.cloud.bridge.service.core.ec2.EC2ImportKeyPair;
-import com.cloud.bridge.service.core.ec2.EC2InstanceFilterSet;
-import com.cloud.bridge.service.core.ec2.EC2IpPermission;
-import com.cloud.bridge.service.core.ec2.EC2KeyPairFilterSet;
-import com.cloud.bridge.service.core.ec2.EC2RebootInstances;
-import com.cloud.bridge.service.core.ec2.EC2RegisterImage;
-import com.cloud.bridge.service.core.ec2.EC2ReleaseAddress;
-import com.cloud.bridge.service.core.ec2.EC2RunInstances;
-import com.cloud.bridge.service.core.ec2.EC2SecurityGroup;
-import com.cloud.bridge.service.core.ec2.EC2SnapshotFilterSet;
-import com.cloud.bridge.service.core.ec2.EC2StartInstances;
-import com.cloud.bridge.service.core.ec2.EC2StopInstances;
-import com.cloud.bridge.service.core.ec2.EC2Volume;
-import com.cloud.bridge.service.core.ec2.EC2VolumeFilterSet;
 import com.cloud.bridge.service.exception.EC2ServiceException;
 import com.cloud.bridge.service.exception.EC2ServiceException.ClientError;
 import com.cloud.bridge.service.exception.PermissionDeniedException;
@@ -226,6 +159,8 @@ public abstract class EC2RestServlet extends HttpServlet implements Supplier<EC2
             describeAddresses(request, response);
          else if (action.equalsIgnoreCase("DescribeAvailabilityZones"))
             describeAvailabilityZones(request, response);
+         else if (action.equalsIgnoreCase("DescribeRegions"))
+            describeRegions(request, response);
          else if (action.equalsIgnoreCase("DescribeImageAttribute"))
             describeImageAttribute(request, response);
          else if (action.equalsIgnoreCase("DescribeImages"))
@@ -981,6 +916,26 @@ public abstract class EC2RestServlet extends HttpServlet implements Supplier<EC2
       }
       // -> execute the request
       DescribeAvailabilityZonesResponse EC2response = GeneratedCode.toDescribeAvailabilityZonesResponse(get()
+            .handleRequest(EC2request));
+      serializeResponse(response, EC2response);
+   }
+
+   private void describeRegions(HttpServletRequest request, HttpServletResponse response)
+         throws ADBException, XMLStreamException, IOException {
+      EC2DescribeRegions EC2request = new EC2DescribeRegions();
+
+      // -> load in all the "ZoneName.n" parameters if any
+      Enumeration<?> names = request.getParameterNames();
+      while (names.hasMoreElements()) {
+         String key = (String) names.nextElement();
+         if (key.startsWith("RegionName")) {
+            String[] value = request.getParameterValues(key);
+            if (null != value && 0 < value.length)
+               EC2request.addRegion(value[0]);
+         }
+      }
+      // -> execute the request
+      DescribeRegionsResponse EC2response = GeneratedCode.toDescribeRegionsResponse(get()
             .handleRequest(EC2request));
       serializeResponse(response, EC2response);
    }
