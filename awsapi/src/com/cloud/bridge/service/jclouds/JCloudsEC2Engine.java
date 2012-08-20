@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -969,7 +970,9 @@ public class JCloudsEC2Engine implements EC2Engine {
 
       try {
          String[] templateIds = request.getImageSet();
-         return listTemplates(ImmutableSet.<String>copyOf(templateIds), images);
+         return listTemplates(Arrays.asList(templateIds), images);
+         // TODO: This should work but does not, need to fix this
+         // return listTemplates(ImmutableSet.<String>copyOf(templateIds), images);
       } catch( Exception e ) {
          logger.error( "EC2 DescribeImages - ", e);
          throw new EC2ServiceException(ServerError.InternalError, e.getMessage() != null ? e.getMessage() : "An unexpected error occurred.");
@@ -1116,7 +1119,9 @@ public class JCloudsEC2Engine implements EC2Engine {
    @Override
    public EC2DescribeAvailabilityZonesResponse handleRequest(EC2DescribeAvailabilityZones request) {
       try {
-         EC2DescribeAvailabilityZonesResponse availableZones = listZones(ImmutableSet.<String>copyOf(request.getZoneSet()));
+         EC2DescribeAvailabilityZonesResponse availableZones = listZones(Arrays.asList(request.getZoneSet()));
+         // TODO: This should work but does not, need to fix this
+         // EC2DescribeAvailabilityZonesResponse availableZones = listZones(ImmutableSet.<String>copyOf(request.getZoneSet()));
          EC2AvailabilityZonesFilterSet azfs = request.getFilterSet();
          if ( null == azfs )
             return availableZones;
@@ -1142,7 +1147,9 @@ public class JCloudsEC2Engine implements EC2Engine {
    @Override
    public EC2DescribeRegionsResponse handleRequest(EC2DescribeRegions request) {
       try {
-         EC2DescribeRegionsResponse availableRegions = listRegions(ImmutableSet.<String>copyOf(request.getRegionSet()));
+         EC2DescribeRegionsResponse availableRegions = listRegions(Arrays.asList(request.getRegionSet()));
+         // TODO: This should work but does not, need to fix this
+         // EC2DescribeRegionsResponse availableRegions = listRegions(ImmutableSet.<String>copyOf(request.getRegionSet()));
          EC2RegionsFilterSet regionsFilterSet = request.getFilterSet();
          if ( null == regionsFilterSet )
             return availableRegions;
@@ -1884,7 +1891,7 @@ public class JCloudsEC2Engine implements EC2Engine {
     * @return the same object passed in as the "images" parameter modified with one or more
     *         EC2Image objects loaded.
     */
-   private EC2DescribeImagesResponse listTemplates(ImmutableSet<String> imageIds, EC2DescribeImagesResponse images) throws EC2ServiceException {
+   private EC2DescribeImagesResponse listTemplates(Iterable<String> imageIds, EC2DescribeImagesResponse images) throws EC2ServiceException {
       ImmutableSet<VAppTemplate> templates = FluentIterable.from(getApi().getOrgApi().list())
                                                            .transformAndConcat(new Function<Reference, Iterable<Link>>(){
                                                               @Override
