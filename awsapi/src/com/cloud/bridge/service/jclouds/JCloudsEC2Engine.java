@@ -969,7 +969,7 @@ public class JCloudsEC2Engine implements EC2Engine {
 
       try {
          String[] templateIds = request.getImageSet();
-         return listTemplates(ImmutableSet.copyOf(templateIds), images);
+         return listTemplates(ImmutableSet.<String>copyOf(templateIds), images);
       } catch( Exception e ) {
          logger.error( "EC2 DescribeImages - ", e);
          throw new EC2ServiceException(ServerError.InternalError, e.getMessage() != null ? e.getMessage() : "An unexpected error occurred.");
@@ -1116,7 +1116,7 @@ public class JCloudsEC2Engine implements EC2Engine {
    @Override
    public EC2DescribeAvailabilityZonesResponse handleRequest(EC2DescribeAvailabilityZones request) {
       try {
-         EC2DescribeAvailabilityZonesResponse availableZones = listZones(ImmutableSet.copyOf(request.getZoneSet()));
+         EC2DescribeAvailabilityZonesResponse availableZones = listZones(ImmutableSet.<String>copyOf(request.getZoneSet()));
          EC2AvailabilityZonesFilterSet azfs = request.getFilterSet();
          if ( null == azfs )
             return availableZones;
@@ -1142,7 +1142,7 @@ public class JCloudsEC2Engine implements EC2Engine {
    @Override
    public EC2DescribeRegionsResponse handleRequest(EC2DescribeRegions request) {
       try {
-         EC2DescribeRegionsResponse availableRegions = listRegions(ImmutableSet.copyOf(request.getRegionSet()));
+         EC2DescribeRegionsResponse availableRegions = listRegions(ImmutableSet.<String>copyOf(request.getRegionSet()));
          EC2RegionsFilterSet regionsFilterSet = request.getFilterSet();
          if ( null == regionsFilterSet )
             return availableRegions;
