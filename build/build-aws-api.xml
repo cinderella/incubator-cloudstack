@@ -351,14 +351,14 @@
 		<get src="http://elasticloadbalancing.amazonaws.com/doc/2011-04-05/ElasticLoadBalancing.wsdl" dest="wsdl/" verbose="true" usetimestamp="true" overwrite="false"/>
 	</target>	
 	<target name="codegen-server-ec2">
-		<wsdl2code wsdlfilename="${base.dir}/wsdl/AmazonEC2.wsdl" serverside="true" generateservicexml="true" skipbuildxml="true" serversideinterface="true" namespacetopackages="http://ec2.amazonaws.com/doc/2010-11-15/=com.amazon.ec2"
+		<wsdl2code wsdlfilename="${base.dir}/wsdl/AmazonEC2.wsdl" serverside="true" generateservicexml="true" skipbuildxml="true" serversideinterface="true" namespacetopackages="http://ec2.amazonaws.com/doc/2009-10-31/=com.amazon.ec2"
     targetsourcefolderlocation="src" targetresourcesfolderlocation="resource/AmazonEC2" overwrite="true" />
 	</target>
 	<target name="codegen-server-elb" depends="download-ELB-wsdl">
 		<wsdl2code wsdlfilename="${base.dir}/wsdl/ElasticLoadBalancing.wsdl" serverside="true" generateservicexml="true" skipbuildxml="true" serversideinterface="true" namespacetopackages="http://elasticloadbalancing.amazonaws.com/doc/2011-04-05/=com.amazon.elb" targetsourcefolderlocation="src" targetresourcesfolderlocation="resource/AmazonELB" overwrite="true" />
 	</target>
 	<target name="codegen-client-ec2">
-		<wsdl2code wsdlfilename="${base.dir}/wsdl/AmazonEC2.wsdl" serverside="false" generateservicexml="false" skipbuildxml="true" serversideinterface="false" namespacetopackages="http://ec2.amazonaws.com/doc/2010-11-15/=com.amazon.ec2.clieent" targetsourcefolderlocation="src" targetresourcesfolderlocation="resource/AmazonEC2" overwrite="true" />
+		<wsdl2code wsdlfilename="${base.dir}/wsdl/AmazonEC2.wsdl" serverside="false" generateservicexml="false" skipbuildxml="true" serversideinterface="false" namespacetopackages="http://ec2.amazonaws.com/doc/2009-10-31/=com.amazon.ec2.clieent" targetsourcefolderlocation="src" targetresourcesfolderlocation="resource/AmazonEC2" overwrite="true" />
 	</target>
 	<target name="codegen-client-elb" depends="download-ELB-wsdl">
 		<wsdl2code wsdlfilename="${base.dir}/wsdl/ElasticLoadBalancing.wsdl" serverside="false" generateservicexml="false" skipbuildxml="true" serversideinterface="false" namespacetopackages="http://elasticloadbalancing.amazonaws.com/doc/2011-04-05/=com.amazon.elb.client" targetsourcefolderlocation="src" targetresourcesfolderlocation="resource/AmazonELB" overwrite="true" />

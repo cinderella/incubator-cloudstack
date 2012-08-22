@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions targetNamespace="http://ec2.amazonaws.com/doc/2010-11-15/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://ec2.amazonaws.com/doc/2010-11-15/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+<definitions targetNamespace="http://ec2.amazonaws.com/doc/2009-10-31/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://ec2.amazonaws.com/doc/2009-10-31/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
   <types>
-    <xs:schema elementFormDefault="qualified" targetNamespace="http://ec2.amazonaws.com/doc/2010-11-15/" xmlns:tns="http://ec2.amazonaws.com/doc/2010-11-15/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://ec2.amazonaws.com/doc/2009-10-31/" xmlns:tns="http://ec2.amazonaws.com/doc/2009-10-31/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <xs:element name="CreateImage" type="tns:CreateImageType"/>
       <xs:complexType name="CreateImageType">
         <xs:sequence>
