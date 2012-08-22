@@ -33,13 +33,13 @@
         implements org.apache.axis2.databinding.ADBBean{
         /* This type was generated from the piece of schema that had
                 name = DescribeSpotPriceHistoryType
-                Namespace URI = http://ec2.amazonaws.com/doc/2010-11-15/
+                Namespace URI = http://ec2.amazonaws.com/doc/2009-10-31/
                 Namespace Prefix = ns1
                 */
             
 
         private static java.lang.String generatePrefix(java.lang.String namespace) {
-            if(namespace.equals("http://ec2.amazonaws.com/doc/2010-11-15/")){
+            if(namespace.equals("http://ec2.amazonaws.com/doc/2009-10-31/")){
                 return "ns1";
             }
             return org.apache.axis2.databinding.utils.BeanUtil.getUniquePrefix();
@@ -350,7 +350,7 @@
                   if (serializeType){
                
 
-                   java.lang.String namespacePrefix = registerPrefix(xmlWriter,"http://ec2.amazonaws.com/doc/2010-11-15/");
+                   java.lang.String namespacePrefix = registerPrefix(xmlWriter,"http://ec2.amazonaws.com/doc/2009-10-31/");
                    if ((namespacePrefix != null) && (namespacePrefix.trim().length() > 0)){
                        writeAttribute("xsi","http://www.w3.org/2001/XMLSchema-instance","type",
                            namespacePrefix+":DescribeSpotPriceHistoryType",
@@ -364,7 +364,7 @@
                
                    }
                 if (localStartTimeTracker){
-                                    namespace = "http://ec2.amazonaws.com/doc/2010-11-15/";
+                                    namespace = "http://ec2.amazonaws.com/doc/2009-10-31/";
                                     if (! namespace.equals("")) {
                                         prefix = xmlWriter.getPrefix(namespace);
 
@@ -398,7 +398,7 @@
                                     
                                    xmlWriter.writeEndElement();
                              } if (localEndTimeTracker){
-                                    namespace = "http://ec2.amazonaws.com/doc/2010-11-15/";
+                                    namespace = "http://ec2.amazonaws.com/doc/2009-10-31/";
                                     if (! namespace.equals("")) {
                                         prefix = xmlWriter.getPrefix(namespace);
 
@@ -435,19 +435,19 @@
                                             if (localInstanceTypeSet==null){
                                                  throw new org.apache.axis2.databinding.ADBException("instanceTypeSet cannot be null!!");
                                             }
-                                           localInstanceTypeSet.serialize(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/","instanceTypeSet"),
+                                           localInstanceTypeSet.serialize(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/","instanceTypeSet"),
                                                factory,xmlWriter);
                                         } if (localProductDescriptionSetTracker){
                                             if (localProductDescriptionSet==null){
                                                  throw new org.apache.axis2.databinding.ADBException("productDescriptionSet cannot be null!!");
                                             }
-                                           localProductDescriptionSet.serialize(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/","productDescriptionSet"),
+                                           localProductDescriptionSet.serialize(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/","productDescriptionSet"),
                                                factory,xmlWriter);
                                         } if (localFilterSetTracker){
                                             if (localFilterSet==null){
                                                  throw new org.apache.axis2.databinding.ADBException("filterSet cannot be null!!");
                                             }
-                                           localFilterSet.serialize(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/","filterSet"),
+                                           localFilterSet.serialize(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/","filterSet"),
                                                factory,xmlWriter);
                                         }
                     xmlWriter.writeEndElement();
@@ -612,7 +612,7 @@
                  java.util.ArrayList attribList = new java.util.ArrayList();
 
                  if (localStartTimeTracker){
-                                      elementList.add(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/",
+                                      elementList.add(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/",
                                                                       "startTime"));
                                  
                                         if (localStartTime != null){
@@ -621,7 +621,7 @@
                                            throw new org.apache.axis2.databinding.ADBException("startTime cannot be null!!");
                                         }
                                     } if (localEndTimeTracker){
-                                      elementList.add(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/",
+                                      elementList.add(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/",
                                                                       "endTime"));
                                  
                                         if (localEndTime != null){
@@ -630,7 +630,7 @@
                                            throw new org.apache.axis2.databinding.ADBException("endTime cannot be null!!");
                                         }
                                     } if (localInstanceTypeSetTracker){
-                            elementList.add(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/",
+                            elementList.add(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/",
                                                                       "instanceTypeSet"));
                             
                             
@@ -639,7 +639,7 @@
                                     }
                                     elementList.add(localInstanceTypeSet);
                                 } if (localProductDescriptionSetTracker){
-                            elementList.add(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/",
+                            elementList.add(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/",
                                                                       "productDescriptionSet"));
                             
                             
@@ -648,7 +648,7 @@
                                     }
                                     elementList.add(localProductDescriptionSet);
                                 } if (localFilterSetTracker){
-                            elementList.add(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/",
+                            elementList.add(new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/",
                                                                       "filterSet"));
                             
                             
@@ -735,7 +735,7 @@
                                     
                                     while (!reader.isStartElement() && !reader.isEndElement()) reader.next();
                                 
-                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/","startTime").equals(reader.getName())){
+                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/","startTime").equals(reader.getName())){
                                 
                                     java.lang.String content = reader.getElementText();
                                     
@@ -753,7 +753,7 @@
                                     
                                     while (!reader.isStartElement() && !reader.isEndElement()) reader.next();
                                 
-                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/","endTime").equals(reader.getName())){
+                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/","endTime").equals(reader.getName())){
                                 
                                     java.lang.String content = reader.getElementText();
                                     
@@ -771,7 +771,7 @@
                                     
                                     while (!reader.isStartElement() && !reader.isEndElement()) reader.next();
                                 
-                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/","instanceTypeSet").equals(reader.getName())){
+                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/","instanceTypeSet").equals(reader.getName())){
                                 
                                                 object.setInstanceTypeSet(com.amazon.ec2.InstanceTypeSetType.Factory.parse(reader));
                                               
@@ -786,7 +786,7 @@
                                     
                                     while (!reader.isStartElement() && !reader.isEndElement()) reader.next();
                                 
-                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/","productDescriptionSet").equals(reader.getName())){
+                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/","productDescriptionSet").equals(reader.getName())){
                                 
                                                 object.setProductDescriptionSet(com.amazon.ec2.ProductDescriptionSetType.Factory.parse(reader));
                                               
@@ -801,7 +801,7 @@
                                     
                                     while (!reader.isStartElement() && !reader.isEndElement()) reader.next();
                                 
-                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/","filterSet").equals(reader.getName())){
+                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/","filterSet").equals(reader.getName())){
                                 
                                                 object.setFilterSet(com.amazon.ec2.FilterSetType.Factory.parse(reader));
                                               

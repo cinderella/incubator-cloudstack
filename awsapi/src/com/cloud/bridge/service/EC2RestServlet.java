@@ -92,7 +92,7 @@ public abstract class EC2RestServlet extends HttpServlet implements Supplier<EC2
          logger.info("Use EC2 properties file: " + propertiesFile.getAbsolutePath());
          try {
             ec2properties.load(new FileInputStream(propertiesFile));
-            wsdlVersion = ec2properties.getProperty("WSDLVersion", "2010-11-15");
+            wsdlVersion = ec2properties.getProperty("WSDLVersion", "2009-10-31");
          } catch (IOException e) {
             throw Throwables.propagate(e);
          }

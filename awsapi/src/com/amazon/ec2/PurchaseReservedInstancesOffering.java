@@ -33,14 +33,14 @@
         implements org.apache.axis2.databinding.ADBBean{
         
                 public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName(
-                "http://ec2.amazonaws.com/doc/2010-11-15/",
+                "http://ec2.amazonaws.com/doc/2009-10-31/",
                 "PurchaseReservedInstancesOffering",
                 "ns1");
 
             
 
         private static java.lang.String generatePrefix(java.lang.String namespace) {
-            if(namespace.equals("http://ec2.amazonaws.com/doc/2010-11-15/")){
+            if(namespace.equals("http://ec2.amazonaws.com/doc/2009-10-31/")){
                 return "ns1";
             }
             return org.apache.axis2.databinding.utils.BeanUtil.getUniquePrefix();
@@ -343,7 +343,7 @@
                 while(!reader.isEndElement()) {
                     if (reader.isStartElement() ){
                 
-                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2010-11-15/","PurchaseReservedInstancesOffering").equals(reader.getName())){
+                                    if (reader.isStartElement() && new javax.xml.namespace.QName("http://ec2.amazonaws.com/doc/2009-10-31/","PurchaseReservedInstancesOffering").equals(reader.getName())){
                                 
                                                 object.setPurchaseReservedInstancesOffering(com.amazon.ec2.PurchaseReservedInstancesOfferingType.Factory.parse(reader));
                                             
